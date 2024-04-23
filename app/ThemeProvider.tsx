@@ -1,0 +1,95 @@
+"use client";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+type Theme = "light" | "dark" | "cupcake";
+const ThemeContext = createContext<{
+  theme: Theme;
+  changeTheme: (theme: Theme) => void;
+}>({
+  theme: "light",
+  changeTheme: () => {},
+});
+
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  const [theme, setTheme] = useState<Theme>("light");
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const storedTheme: Theme =
+      (localStorage.getItem("theme") as Theme) || theme;
+    setTheme(storedTheme);
+
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
+  if (!isMounted) {
+    return <></>;
+  }
+
+  const changeTheme = (newTheme: "light" | "dark" | "cupcake") => {
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
+
+  return (
+    <ThemeContext.Provider value={{ theme, changeTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  return context;
+};
+
+export const ThemeSwitcher = () => {
+  const { theme, changeTheme } = useTheme();
+  return (
+    <label className="flex cursor-pointer gap-1">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="8" cy="8" r="3" />
+        <path d="M8 1v1M8 14v1M2.6 2.6l1 1M12.4 12.4l1 1M1 8h1M14 8h1M2.6 13.4l1-1M12.4 3.6l1-1" />
+      </svg>
+      <input
+        type="checkbox"
+        value="synthwave"
+        className="toggle theme-controller toggle-xs"
+        onChange={(e) => changeTheme(e.target.checked ? "dark" : "light")}
+        checked={theme !== "light"}
+      />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </label>
+  );
+};
