@@ -14,12 +14,6 @@ export const TodoCreate = () => {
   const [_, actions] = useAppState();
   useFocusInputOnKey(inputEl, "/");
 
-  const mouseEnter = () => {
-    if (inputEl.current != null) {
-      inputEl.current.focus();
-    }
-  };
-
   const addTodoOnEnter: KeyboardEventHandler<HTMLInputElement> = (e) => {
     // add an item when press enter
     if (e.key === "Enter") {
@@ -37,14 +31,12 @@ export const TodoCreate = () => {
   };
 
   return (
-    <div onMouseEnter={mouseEnter}>
-      <input
-        onKeyDown={addTodoOnEnter}
-        ref={inputEl}
-        type="text"
-        placeholder="Type here"
-        className="bg-transparent rounded-none w-full p-4 pl-0 outline-none border-b-2 border-b-solid border-b-accent focus:border-b-primary-content transition-all duration-300 linear"
-      />
-    </div>
+    <input
+      onKeyDown={addTodoOnEnter}
+      ref={inputEl}
+      type="text"
+      placeholder="Type here"
+      className="bg-transparent rounded-none w-full mb-12 p-4 pl-0 outline-none border-b-2 border-b-solid border-b-accent focus:border-b-primary-content transition-all duration-300 linear"
+    />
   );
 };

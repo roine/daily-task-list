@@ -1,4 +1,5 @@
 import { Todo } from "@/state/state";
+import { v4 as uuidv4 } from "uuid";
 
 const themeKey = "theme";
 const todoStateKey = "todos";
@@ -58,10 +59,60 @@ export const deleteTodo = async (
   }
 };
 
+const todosForPresentation: Todo[] = [
+  {
+    id: uuidv4(),
+    text: "Press `/` to focus the input",
+    completedDate: null,
+    recurrence: "daily",
+    children: [],
+  },
+  {
+    id: uuidv4(),
+    text: "Add a todo item with `Enter`",
+    completedDate: null,
+    recurrence: "daily",
+    children: [],
+  },
+  {
+    id: uuidv4(),
+    text: "Add another todo item with `Enter`",
+    completedDate: null,
+    recurrence: "daily",
+    children: [],
+  },
+  {
+    id: uuidv4(),
+    text: "Press `ESC` to unfocus (and access global shortcuts)",
+    completedDate: null,
+    recurrence: "daily",
+    children: [],
+  },
+  {
+    id: uuidv4(),
+    text: "Navigate the list with arrow up and down",
+    completedDate: null,
+    recurrence: "daily",
+    children: [],
+  },
+
+  {
+    id: uuidv4(),
+    text: "Press `Enter` to complete a todo item",
+    completedDate: new Date(),
+    recurrence: "daily",
+    children: [],
+  },
+];
+
 export const getTodos = async (): Promise<DataStructure> => {
   try {
-    const [stored] = getData();
-    let todos: Todo[] = stored ? stored.todos : [];
+    const [stored, updateData] = getData();
+    // if the store was never set, add default
+    if (stored?.todos == null) {
+      updateData({ todos: todosForPresentation });
+    }
+    let todos: Todo[] = stored?.todos ? stored.todos : todosForPresentation;
     let title = stored?.title ?? "Untitled";
     return { todos, title };
   } catch (e) {
@@ -92,7 +143,6 @@ export const toggleCompletedTodo = async (
 export const updateTodolistTitle = async (title: string): Promise<string> => {
   try {
     const [_, updateData] = getData();
-    console.log("called");
     updateData({ title });
     return title;
   } catch (error) {

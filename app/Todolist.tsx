@@ -24,7 +24,7 @@ export default function Todolist() {
     void actions.getTodos();
   }, []);
 
-  return (
+  return state.todos.length > 0 ? (
     <ul className="overflow-auto h-full flex-grow">
       {state.todos.map((todo) => (
         <TodoItem
@@ -35,5 +35,7 @@ export default function Todolist() {
         />
       ))}
     </ul>
+  ) : (
+    <p>Congratulations, you can rest now.</p>
   );
 }
