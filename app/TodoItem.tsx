@@ -1,5 +1,5 @@
-import { Todo } from "./state";
-import { getActions } from "@/reducer";
+import { Todo } from "./state/state";
+import { getActions } from "@/state/reducer";
 
 export const TodoItem = (todo: Todo & ReturnType<typeof getActions>) => {
   return (
@@ -18,8 +18,3 @@ export const TodoItem = (todo: Todo & ReturnType<typeof getActions>) => {
     </li>
   );
 };
-
-// const TodoItemWrapper = styled.div`
-//   display: flex;
-//   flex-direction: row;
-// `;

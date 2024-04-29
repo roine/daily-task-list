@@ -1,6 +1,7 @@
+"use client";
 import React, { useReducer } from "react";
-import { initialState, State } from "@/state";
-import { todoReducer, getActions } from "@/reducer";
+import { initialState, State } from "@/state/state";
+import { todoReducer, getActions } from "@/state/reducer";
 
 export const AppStateContext =
   React.createContext<[State, ReturnType<typeof getActions>]>(null);

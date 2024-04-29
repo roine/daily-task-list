@@ -1,14 +1,19 @@
-import { useAppState } from "./AppStateProvider";
+import { useAppState } from "./state/AppStateProvider";
 import { TodoItem } from "@/TodoItem";
+import { useEffect } from "react";
 
 export default function Todolist() {
   const [state, actions] = useAppState();
+
   const ongoingTodos = state.todos.filter((todo) => todo.completedDate == null);
   const completedTodos = state.todos.filter(
     (todo) => todo.completedDate !== null,
   );
 
-  console.log(state);
+  useEffect(() => {
+    void actions.getTodos();
+  }, []);
+
   return (
     <div>
       <ul>

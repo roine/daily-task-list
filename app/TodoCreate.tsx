@@ -4,7 +4,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { useAppState } from "@/AppStateProvider";
+import { useAppState } from "@/state/AppStateProvider";
+import { v4 as uuidv4 } from "uuid";
 
 export const TodoCreate = () => {
   const inputDiv = useRef<HTMLInputElement | null>(null);
@@ -21,6 +22,7 @@ export const TodoCreate = () => {
     // add todo when press enter
     if (e.key === "Enter") {
       actions.addTodo({
+        id: uuidv4(),
         text: e.currentTarget.value,
         completedDate: null,
         recurrence: "daily",
@@ -39,7 +41,7 @@ export const TodoCreate = () => {
         ref={inputDiv}
         type="text"
         placeholder="Type here"
-        className="bg-transparent w-full mb-6 p-4 pl-0 outline-none border-b-2 border-b-solid border-b-primary focus:border-b-primary-content transition-all duration-300 linear"
+        className="bg-transparent rounded-none w-full mb-6 p-4 pl-0 outline-none border-b-2 border-b-solid border-b-accent focus:border-b-primary-content transition-all duration-300 linear"
       />
     </div>
   );

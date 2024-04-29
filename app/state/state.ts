@@ -1,4 +1,7 @@
+import { v4 as uuidv4 } from "uuid";
+
 export type Todo = {
+  id: string;
   text: string;
   completedDate: Date | null;
   recurrence: "daily" | "weekly" | "monthly" | "once" | CustomRecurrence;
@@ -32,35 +35,12 @@ export type CustomRecurrence = {
 
 export type State = {
   todoTitle: string;
+  globalError?: string;
   todos: Todo[];
 };
 
 export const initialState: State = {
   todoTitle: "Untitled",
-  todos: [
-    {
-      completedDate: null,
-      text: "read up to 5 job emails",
-      recurrence: "daily",
-      children: [],
-    },
-    {
-      completedDate: null,
-      text: "build a multi agent chain",
-      recurrence: "daily",
-      children: [],
-    },
-    {
-      completedDate: null,
-      text: "Add tests to IAG",
-      recurrence: "daily",
-      children: [],
-    },
-    {
-      completedDate: new Date(),
-      text: "Work on daily tasklist",
-      recurrence: "daily",
-      children: [],
-    },
-  ],
+  globalError: undefined,
+  todos: [],
 };

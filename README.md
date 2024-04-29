@@ -14,7 +14,7 @@ Todo features
 - [ ] edit (need to figure out ux)
 - [x] mark a complete
 - [ ] Multi lists (list arc-spaces-like) - paid user
-- [ ] Store in localstorage
+- [x] Add to localstorage
 - [ ] Children todo with own cycle
 - [ ] Set as recurring, with recurring range predefined, click through (once, recurring daily, recurring weekly, keep until finished)
     - [ ] 'Once' keeps the item until it's done, with the completed status untouched

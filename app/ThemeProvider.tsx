@@ -7,24 +7,43 @@ import {
   useState,
 } from "react";
 
-type Theme = "light" | "dark" | "cupcake";
+const light = "emerald";
+const dark = "dim";
+
+type Theme = typeof light | typeof dark;
+
 const ThemeContext = createContext<{
   theme: Theme;
   changeTheme: (theme: Theme) => void;
 }>({
-  theme: "light",
+  theme: light,
   changeTheme: () => {},
 });
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>(dark);
   const [isMounted, setIsMounted] = useState(false);
 
+  const getMediaQueryPreference = (): Theme => {
+    const mediaQuery = "(prefers-color-scheme: dark)";
+    const mql = window.matchMedia(mediaQuery);
+    const hasPreference = mql.matches;
+    if (hasPreference) {
+      return mql.matches ? dark : light;
+    }
+    return light;
+  };
+
+  // Load the theme either from localStorage or from the media query
   useEffect(() => {
     setIsMounted(true);
-    const storedTheme: Theme =
-      (localStorage.getItem("theme") as Theme) || theme;
-    setTheme(storedTheme);
+    const userSetPreference = localStorage.getItem("theme") as Theme;
+    if (userSetPreference !== null) {
+      setTheme(userSetPreference);
+    } else {
+      const mediaQueryPreference = getMediaQueryPreference();
+      setTheme(mediaQueryPreference);
+    }
 
     return () => {
       setIsMounted(false);
@@ -35,14 +54,17 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return <></>;
   }
 
-  const changeTheme = (newTheme: "light" | "dark" | "cupcake") => {
+  const changeTheme = (newTheme: Theme) => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
   };
 
   return (
     <ThemeContext.Provider value={{ theme, changeTheme }}>
-      {children}
+      <div data-theme={theme}>
+        {children}
+        {theme}
+      </div>
     </ThemeContext.Provider>
   );
 };
@@ -74,8 +96,8 @@ export const ThemeSwitcher = () => {
         type="checkbox"
         value="synthwave"
         className="toggle theme-controller toggle-xs"
-        onChange={(e) => changeTheme(e.target.checked ? "dark" : "light")}
-        checked={theme !== "light"}
+        onChange={(e) => changeTheme(e.target.checked ? dark : light)}
+        checked={theme !== light}
       />
       <svg
         xmlns="http://www.w3.org/2000/svg"
