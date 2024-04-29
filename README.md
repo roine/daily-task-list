@@ -10,11 +10,18 @@ Todo features
 ==
 - [x] Look good
 - [x] Add
-- [ ] remove (need to figure out ux)
+- [x] remove (need to figure out ux)
+- [ ] remove on mobile and with icon
 - [ ] edit (need to figure out ux)
 - [x] mark a complete
 - [ ] Multi lists (list arc-spaces-like) - paid user
+- [x] Focus create input on press '/'
+- [ ] Change theme on cmd+Up/Down, rotate withing dark and light themes
+  - [ ] Change dark<-> light cmd+left/right
+- [ ] Store previous state until completely persisted (caching)
+- [x] Keyboard control to mark todo as complete
 - [x] Add to localstorage
+- [x] Mark as completed to localstorage
 - [ ] Children todo with own cycle
 - [ ] Set as recurring, with recurring range predefined, click through (once, recurring daily, recurring weekly, keep until finished)
     - [ ] 'Once' keeps the item until it's done, with the completed status untouched

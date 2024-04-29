@@ -35,12 +35,12 @@ export type CustomRecurrence = {
 
 export type State = {
   todoTitle: string;
-  globalError?: string;
+  globalError: string | null;
   todos: Todo[];
 };
 
 export const initialState: State = {
   todoTitle: "Untitled",
-  globalError: undefined,
+  globalError: null,
   todos: [],
 };

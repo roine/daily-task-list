@@ -11,20 +11,16 @@ type AppLayoutProps = {
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const [state] = useAppState();
-  console.log(state);
+
   return (
-    <div className="w-screen h-screen">
-      {/*  maybe a sidebar */}
-      <main className="relative mx-auto max-w-4xl pt-16  px-4 lg:px-0">
-        <div className=" absolute right-0 top-6 hidden lg:block">
-          <ThemeSwitcher />
-        </div>
-        {state.globalError && (
+    <div className="w-screen h-screen overflow-auto">
+      <main className="relative mx-auto max-w-4xl py-16  px-4 lg:px-0">
+        <ThemeSwitcher className="absolute right-0 top-6 hidden lg:block" />
+        {state.globalError != null && (
           <Alert className="mb-4" variant="error">
             {state.globalError}
           </Alert>
         )}
-
         {children}
       </main>
     </div>

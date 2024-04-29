@@ -9,7 +9,7 @@ export const TodolistTitle = ({}: TodoListTitleProps) => {
       className="text-4xl tracking-tight outline-none mb-10"
       aria-placeholder={"Your todo list title"}
       defaultValue={state.todoTitle}
-      onChange={(e) => actions.changeTodoTitle(e.currentTarget.innerText)}
+      onBlur={(e) => actions.changeTodoTitle(e.currentTarget.innerText)}
       suppressContentEditableWarning={true}
     >
       {state.todoTitle}

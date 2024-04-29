@@ -6,6 +6,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/ThemeProvider";
 import cls from "classnames";
 import { AppStateProvider } from "@/state/AppStateProvider";
+import classNames from "classnames";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -25,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={roboto.className}>
+      <body className={classNames(roboto.className, "w-full h-full")}>
         <ThemeProvider>
           <AppStateProvider>
             <AppLayout>{children}</AppLayout>

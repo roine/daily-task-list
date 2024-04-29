@@ -1,39 +1,39 @@
 import { useAppState } from "./state/AppStateProvider";
 import { TodoItem } from "@/TodoItem";
-import { useEffect } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
+import { useListNavigation } from "@/hook/useListNavigation";
 
 export default function Todolist() {
   const [state, actions] = useAppState();
 
-  const ongoingTodos = state.todos.filter((todo) => todo.completedDate == null);
-  const completedTodos = state.todos.filter(
-    (todo) => todo.completedDate !== null,
-  );
+  const handlePressEnter = (selectedTodoId: string) => {
+    actions.toggleCompletedTodo(selectedTodoId);
+  };
 
+  const handlePressBackspace = (selectedTodoId: string) => {
+    return actions.deleteTodo(selectedTodoId);
+  };
+
+  const { selectedTodoId } = useListNavigation(state.todos, {
+    onPressEnter: handlePressEnter,
+    onPressBackspace: handlePressBackspace,
+  });
+
+  // Load the todos
   useEffect(() => {
     void actions.getTodos();
   }, []);
 
   return (
-    <div>
-      <ul>
-        {ongoingTodos.map((todo) => (
-          <TodoItem key={todo.id} {...actions} {...todo} />
-        ))}
-      </ul>
-      {completedTodos.length > 0 && ongoingTodos.length > 0 && (
-        <div className="divider" />
-      )}
-      <ul>
-        {completedTodos.map((todo) => (
-          <TodoItem key={todo.id} {...actions} {...todo} />
-        ))}
-      </ul>
-    </div>
+    <ul className="overflow-auto h-full flex-grow">
+      {state.todos.map((todo) => (
+        <TodoItem
+          key={todo.id}
+          {...actions}
+          {...todo}
+          selected={todo.id === selectedTodoId}
+        />
+      ))}
+    </ul>
   );
 }
-
-// const TodolistWrapper = styled.div`
-//   display: flex;
-//   flex-direction: column;
-// `;
