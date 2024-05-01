@@ -14,6 +14,9 @@ export const TodoCreate = () => {
   const [isPending, startTransition] = useTransition();
 
   const addTodoOnEnter: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
+      return;
+    }
     // add an item when press enter
     if (e.key === "Enter") {
       actions.addTodo({

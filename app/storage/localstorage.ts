@@ -10,53 +10,50 @@ type DataStructure = {
 };
 
 /**
- * Internal to help getting and storing
+ * Internal - get and update data in local storage.
  */
 const getData = (): [
   DataStructure | null,
   (dataPatch: Partial<DataStructure>) => void,
 ] => {
+  // Get the stored data from local storage
   const stored = localStorage.getItem(todoStateKey);
-  const updateData =
-    (stored: DataStructure | null) => (dataPatch: Partial<DataStructure>) => {
-      localStorage.setItem(
-        todoStateKey,
-        JSON.stringify({ ...stored, ...dataPatch }),
-      );
-    };
+  // Parse the stored data if it exists
+  const parsedStored = stored ? JSON.parse(stored) : null;
 
-  const withData = updateData(stored ? JSON.parse(stored) : null);
+  /**
+   * A function to update the stored data.
+   *
+   * @param dataPatch - The data to be merged with the stored data.
+   */
+  const updateData = (dataPatch: Partial<DataStructure>) => {
+    // Merge the data patch with the stored data and update the local storage
+    localStorage.setItem(
+      todoStateKey,
+      JSON.stringify({ ...parsedStored, ...dataPatch }),
+    );
+  };
 
-  if (stored) {
-    return [JSON.parse(stored), withData];
-  }
-  return [null, withData];
+  // Return the parsed stored data and the update function
+  return [parsedStored, updateData];
 };
 
 export const addTodo = async (todo: Todo): Promise<Todo> => {
-  try {
-    const [stored, updateData] = getData();
-    let todos: Todo[] = stored ? stored.todos : [];
-    const updatedTodos = [...todos, todo];
-    updateData({ todos: updatedTodos });
-    return todo;
-  } catch (error) {
-    throw error;
-  }
+  const [stored, updateData] = getData();
+  const todos: Todo[] = stored?.todos ?? [];
+  const updatedTodos = [...todos, todo];
+  updateData({ todos: updatedTodos });
+  return todo;
 };
 
 export const deleteTodo = async (
   todoId: Todo["id"],
 ): Promise<{ deleted: boolean }> => {
-  try {
-    const [stored, updateData] = getData();
-    let todos: Todo[] = stored ? stored.todos : [];
-    const updatedTodos = todos.filter((todo) => todo.id !== todoId);
-    updateData({ todos: updatedTodos });
-    return { deleted: true };
-  } catch (error) {
-    throw error;
-  }
+  const [stored, updateData] = getData();
+  const todos: Todo[] = stored?.todos ?? [];
+  const updatedTodos = todos.filter((todo) => todo.id !== todoId);
+  updateData({ todos: updatedTodos });
+  return { deleted: true };
 };
 
 const todosForPresentation: Todo[] = [
@@ -112,46 +109,35 @@ const todosForPresentation: Todo[] = [
 ];
 
 export const getTodos = async (): Promise<DataStructure> => {
-  try {
-    const [stored, updateData] = getData();
-    // if the store was never set, add default
-    if (stored?.todos == null) {
-      updateData({ todos: todosForPresentation });
-    }
-    let todos: Todo[] = stored?.todos ? stored.todos : todosForPresentation;
-    let title = stored?.title ?? "Untitled";
-    return { todos, title };
-  } catch (e) {
-    throw e;
+  const [stored, updateData] = getData();
+  const todos: Todo[] = stored?.todos ?? todosForPresentation;
+  const title = stored?.title ?? "Untitled";
+
+  if (!stored?.todos) {
+    updateData({ todos: todosForPresentation });
   }
+
+  return { todos, title };
 };
 
 export const toggleCompletedTodo = async (
   id: Todo["id"],
 ): Promise<Todo["id"]> => {
-  try {
-    const [stored, updateData] = getData();
-    let todos: Todo[] = stored ? stored.todos : [];
+  const [stored, updateData] = getData();
+  const todos: Todo[] = stored ? stored.todos : [];
 
-    const updatedTodos = todos.map((t) =>
-      t.id === id
-        ? { ...t, completedDate: t.completedDate == null ? new Date() : null }
-        : t,
-    );
+  const updatedTodos = todos.map((t) =>
+    t.id === id
+      ? { ...t, completedDate: t.completedDate == null ? new Date() : null }
+      : t,
+  );
 
-    updateData({ todos: updatedTodos });
-    return id;
-  } catch (error) {
-    throw error;
-  }
+  updateData({ todos: updatedTodos });
+  return id;
 };
 
 export const updateTodolistTitle = async (title: string): Promise<string> => {
-  try {
-    const [_, updateData] = getData();
-    updateData({ title });
-    return title;
-  } catch (error) {
-    throw error;
-  }
+  const [_, updateData] = getData();
+  updateData({ title });
+  return title;
 };

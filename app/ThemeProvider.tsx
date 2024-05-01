@@ -7,28 +7,73 @@ import {
   useEffect,
   useState,
 } from "react";
-import { isDarkMode } from "@/helper/device";
+import { isDarkMode, isLightMode } from "@/helper/device";
+import { Theme } from "daisyui";
 
-const light = "light";
-const dark = "dim";
+export const darkThemes = [
+  "dim",
+  "night",
+  "dark",
+  "dracula",
+  "synthwave",
+  "halloween",
+  "gloom",
+  "forest",
+  "noctis",
+  "luxury",
+  "dracula",
+  "rose",
+  "wine",
+  "black",
+  "neon",
+  "midnight",
+  "prussian",
+  "swiss",
+  "deep",
+  "moon",
+  "night",
+  "dusky",
+  "daylight",
+  "morning",
+  "snow",
+];
 
-type Theme = typeof light | typeof dark;
+export const lightThemes = [
+  "light",
+  "valentine",
+  "pastel",
+  "aqua",
+  "retro",
+  "cyberpunk",
+  "cupcake",
+  "emerald",
+  "corporate",
+  "bumblebee",
+  "garden",
+  "lofi",
+];
 
 const ThemeContext = createContext<{
   theme: Theme;
   changeTheme: (theme: Theme) => void;
 }>({
-  theme: light,
+  theme: "light",
   changeTheme: () => {},
 });
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>(dark);
-  const [isMounted, setIsMounted] = useState(false);
+const getMediaQueryPreference = (): Theme => {
+  if (isDarkMode()) {
+    return "dark";
+  }
+  if (isLightMode()) {
+    return "light";
+  }
+  return "dark";
+};
 
-  const getMediaQueryPreference = (): Theme => {
-    return isDarkMode() ? dark : light;
-  };
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  const [theme, setTheme] = useState<Theme>("dark");
+  const [isMounted, setIsMounted] = useState(false);
 
   // Load the theme either from localStorage or from the media query
   useEffect(() => {
@@ -69,6 +114,42 @@ export const useTheme = () => {
 
 export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
   const { theme, changeTheme } = useTheme();
+
+  // set to intermediate if the theme is not set
+  useEffect(() => {
+    const userSetPreference = localStorage.getItem("theme") as Theme;
+    if (userSetPreference === null) {
+      // @ts-ignore
+      document.getElementById("my-toggle")!.indeterminate = true;
+    }
+  }, []);
+
+  // when system change preferred color change the theme
+  useEffect(() => {
+    const handleThemeChange = () => {
+      const mediaQueryPreference = getMediaQueryPreference();
+      if (theme !== mediaQueryPreference) {
+        changeTheme(mediaQueryPreference);
+      }
+    };
+
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", handleThemeChange);
+    window
+      .matchMedia("(prefers-color-scheme: light)")
+      .addEventListener("change", handleThemeChange);
+
+    return () => {
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .removeEventListener("change", handleThemeChange);
+      window
+        .matchMedia("(prefers-color-scheme: light)")
+        .removeEventListener("change", handleThemeChange);
+    };
+  }, [theme, changeTheme]);
+
   return (
     <div {...props}>
       <label className="flex cursor-pointer gap-1">
@@ -88,10 +169,11 @@ export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
         </svg>
         <input
           type="checkbox"
+          id={"my-toggle"}
           value="synthwave"
           className="toggle theme-controller toggle-xs"
-          onChange={(e) => changeTheme(e.target.checked ? dark : light)}
-          checked={theme !== light}
+          onChange={(e) => changeTheme(e.target.checked ? "dark" : "light")}
+          checked={darkThemes.includes(theme)}
         />
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -4,6 +4,7 @@ import React, { ReactNode } from "react";
 import { ThemeSwitcher, useTheme } from "@/ThemeProvider";
 import { Alert } from "@/Alert";
 import { useAppState } from "@/state/AppStateProvider";
+import { useThemeSwitcherShortcut } from "@/hook/useThemeSwitcherShortcut";
 
 type AppLayoutProps = {
   children: ReactNode;
@@ -11,6 +12,7 @@ type AppLayoutProps = {
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const [state] = useAppState();
+  useThemeSwitcherShortcut();
 
   return (
     <div>
