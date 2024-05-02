@@ -68,7 +68,7 @@ export const TodoCreate = () => {
         type="text"
         placeholder="Press / to focus"
         className={classNames(
-          "flex-grow rounded-none w-full mb-3 xl:mb-12 p-2 xl:p-4 outline-none border-b-2 border-b-solid border-b-accent",
+          "flex-grow rounded-none w-full mb-3 lg:mb-12 p-2 lg:p-4 outline-none border-b-2 border-b-solid border-b-accent",
           "transition-all duration-150 ease-in px-4",
           state.frequencySelected === "Daily" &&
             "bg-emerald-400/5 border-b-emerald-400 focus:border-b-emerald-800",
@@ -86,7 +86,7 @@ export const TodoCreate = () => {
         <span
           key="next-frequency"
           className={classNames(
-            "absolute top-2 xl:top-4 right-4 -translate-y-4 opacity-0",
+            "absolute top-2 lg:top-4 right-4 -translate-y-4 opacity-0",
             state.frequencySelected === "Daily" && "text-emerald-400",
             state.frequencySelected === "Weekly" && "text-red-400",
             state.frequencySelected === "Monthly" && "text-amber-400",
@@ -103,7 +103,7 @@ export const TodoCreate = () => {
           key="current-frequency"
           onClick={handleClickFrequency}
           className={classNames(
-            "absolute top-2 xl:top-4 right-4 opacity-100 cursor-pointer",
+            "absolute top-2 lg:top-4 right-4 opacity-100 cursor-pointer",
 
             state.frequencySelected === "Daily" && "text-emerald-400",
             state.frequencySelected === "Weekly" && "text-red-400",
@@ -112,10 +112,10 @@ export const TodoCreate = () => {
             state.frequencySelected === "Once" && "text-stone-400",
             direction.current === "Up" &&
               isPending &&
-              "-translate-y-2 xl:-translate-y-4 opacity-0 transition-all duration-150 ease-in",
+              "-translate-y-2 lg:-translate-y-4 opacity-0 transition-all duration-150 ease-in",
             direction.current === "Down" &&
               isPending &&
-              "translate-y-2 xl:translate-y-4 opacity-0 transition-all  duration-150 ease-in",
+              "translate-y-2 lg:translate-y-4 opacity-0 transition-all  duration-150 ease-in",
           )}
         >
           {state.frequencySelected}
@@ -123,7 +123,7 @@ export const TodoCreate = () => {
         <span
           key="prev-frequency"
           className={classNames(
-            "absolute top-2 xl:top-4 right-4 translate-y-4 opacity-0",
+            "absolute top-2 lg:top-4 right-4 translate-y-4 opacity-0",
             state.frequencySelected === "Daily" && "text-emerald-400",
             state.frequencySelected === "Weekly" && "text-red-400",
             state.frequencySelected === "Monthly" && "text-amber-400",

@@ -2,6 +2,7 @@ import { useAppState } from "./state/AppStateProvider";
 import { TodoItem } from "@/TodoItem";
 import { useEffect } from "react";
 import { useListNavigation } from "@/hook/useListNavigation";
+import { Todo } from "@/state/state";
 
 export default function Todolist() {
   const [state, actions] = useAppState();
@@ -23,6 +24,18 @@ export default function Todolist() {
   useEffect(() => {
     void actions.getTodos();
   }, []);
+
+  // listen to localstorage change on todo and update accordingly
+  useEffect(() => {
+    window.addEventListener("storage", (e) => {
+      if (e.key === "todos") {
+        void actions.getTodos();
+      }
+    });
+    return () => {
+      window.removeEventListener("storage", () => {});
+    };
+  }, [selectedTodoId]);
 
   return state.todos.length > 0 ? (
     <ul className="overflow-auto h-full flex-grow">

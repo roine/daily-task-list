@@ -22,7 +22,7 @@ export const TodoItem = (todo: TodoItemProps) => {
         },
       )}
     >
-      <span className="flex gap-3 align-items-center py-2 xl:py-3  px-3 print:py-1">
+      <span className="flex gap-3 align-items-center py-2 lg:py-3  px-3 print:py-1">
         <input
           tabIndex={-1}
           type="checkbox"

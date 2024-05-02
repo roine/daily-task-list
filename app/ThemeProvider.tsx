@@ -10,35 +10,24 @@ import {
 import { isDarkMode, isLightMode } from "@/helper/device";
 import { Theme } from "daisyui";
 
-export const darkThemes = [
+const themeKey = "theme";
+
+export const darkThemes: Theme[] = [
   "dim",
-  "night",
   "dark",
   "dracula",
   "synthwave",
   "halloween",
-  "gloom",
   "forest",
-  "noctis",
   "luxury",
-  "dracula",
-  "rose",
-  "wine",
   "black",
-  "neon",
-  "midnight",
-  "prussian",
-  "swiss",
-  "deep",
-  "moon",
   "night",
-  "dusky",
-  "daylight",
-  "morning",
-  "snow",
+  "business",
+  "coffee",
+  "sunset",
 ];
 
-export const lightThemes = [
+export const lightThemes: Theme[] = [
   "light",
   "valentine",
   "pastel",
@@ -51,7 +40,16 @@ export const lightThemes = [
   "bumblebee",
   "garden",
   "lofi",
+  "fantasy",
+  "wireframe",
+  "cmyk",
+  "autumn",
+  "acid",
+  "lemonade",
+  "winter",
+  "nord",
 ];
+// count how many themes and log it
 
 const ThemeContext = createContext<{
   theme: Theme;
@@ -78,7 +76,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   // Load the theme either from localStorage or from the media query
   useEffect(() => {
     setIsMounted(true);
-    const userSetPreference = localStorage.getItem("theme") as Theme;
+    const userSetPreference = localStorage.getItem(themeKey) as Theme;
     if (userSetPreference !== null) {
       setTheme(userSetPreference);
     } else {
@@ -97,7 +95,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const changeTheme = (newTheme: Theme) => {
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+    localStorage.setItem(themeKey, newTheme);
   };
 
   return (
@@ -117,11 +115,25 @@ export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
 
   // set to intermediate if the theme is not set
   useEffect(() => {
-    const userSetPreference = localStorage.getItem("theme") as Theme;
+    const userSetPreference = localStorage.getItem(themeKey) as Theme;
     if (userSetPreference === null) {
       // @ts-ignore
       document.getElementById("my-toggle")!.indeterminate = true;
     }
+  }, []);
+
+  // listen to localstorage change of theme value, and set the theme accordingly
+  useEffect(() => {
+    window.addEventListener("storage", (e) => {
+      if (e.key === themeKey) {
+        const newTheme = e.newValue as Theme;
+        changeTheme(newTheme);
+      }
+    });
+
+    return () => {
+      window.removeEventListener("storage", () => {});
+    };
   }, []);
 
   // when system change preferred color change the theme
