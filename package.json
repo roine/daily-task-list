@@ -12,6 +12,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx}\""
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.6",
     "@tailwindcss/typography": "^0.5.12",
     "animate.css": "^4.1.1",
     "classnames": "^2.5.1",

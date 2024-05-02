@@ -1,12 +1,11 @@
 "use client";
 import React, { useReducer } from "react";
 import { initialState, State } from "@/state/state";
-import { todoReducer, getTodoActions } from "@/state/reducer/todoReducer";
 import { getActions, reducer } from "@/state/reducer";
 
 export const AppStateContext =
   // @ts-ignore
-  React.createContext<[State, ReturnType<typeof getTodoActions>]>(null);
+  React.createContext<[State, ReturnType<typeof getActions>]>(null);
 
 type AppStateProviderProps = {
   children: React.ReactNode;
@@ -21,7 +20,5 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
 };
 
 export const useAppState = (): [State, ReturnType<typeof getActions>] => {
-  const context = React.useContext(AppStateContext);
-
-  return context;
+  return React.useContext(AppStateContext);
 };
