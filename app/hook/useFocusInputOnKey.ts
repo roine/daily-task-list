@@ -1,8 +1,9 @@
 import { MutableRefObject, useCallback, useEffect } from "react";
 
+// This hook will focus the input element when the key is pressed
 export const useFocusInputOnKey = (
   inputEl: MutableRefObject<HTMLInputElement | null>,
-  key: KeyboardEvent["key"],
+  key: KeyboardEvent["key"] | Array<KeyboardEvent["key"]>,
 ) => {
   const handleCreateHotkeys = (e: KeyboardEvent) => {
     const isBodyFocused = document.activeElement === document.body;
@@ -10,7 +11,7 @@ export const useFocusInputOnKey = (
       return;
     }
 
-    if (e.key === key) {
+    if ((key instanceof Array && key.includes(e.key)) || key === e.key) {
       e.preventDefault();
       if (inputEl.current != null) {
         inputEl.current.focus();

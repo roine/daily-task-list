@@ -75,7 +75,7 @@ export const useListNavigation = <T extends { id: string }[]>(
         }
       });
     }
-    if (e.key === "Enter" && onPressEnter != null) {
+    if ((e.key === "Enter" || e.key === " ") && onPressEnter != null) {
       e.preventDefault();
       onPressEnter(selectedTodoId);
     } else if (e.key === "ArrowDown" && list.length > 1) {

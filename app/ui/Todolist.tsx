@@ -1,12 +1,13 @@
-import { useAppState } from "./state/AppStateProvider";
-import { TodoItem } from "@/TodoItem";
+"use client";
+import { useAppState } from "../state/AppStateProvider";
+import { TodoItem } from "@/ui/TodoItem";
 import { useEffect } from "react";
 import { useListNavigation } from "@/hook/useListNavigation";
 import { Todo } from "@/state/state";
+import { useAuth } from "@/auth/AuthProvider";
 
 export default function Todolist() {
   const [state, actions] = useAppState();
-
   const handlePressEnter = (selectedTodoId: string) => {
     actions.toggleCompletedTodo(selectedTodoId);
   };
@@ -15,7 +16,7 @@ export default function Todolist() {
     return actions.deleteTodo(selectedTodoId);
   };
 
-  const { selectedTodoId } = useListNavigation(state.todos, {
+  const { selectedTodoId } = useListNavigation(state.todoLists[0].todos, {
     onPressEnter: handlePressEnter,
     onPressBackspace: handlePressBackspace,
   });
@@ -37,9 +38,9 @@ export default function Todolist() {
     };
   }, [selectedTodoId]);
 
-  return state.todos.length > 0 ? (
+  return state.todoLists[0].todos.length > 0 ? (
     <ul className="overflow-auto h-full flex-grow">
-      {state.todos.map((todo) => (
+      {state.todoLists[0].todos.map((todo) => (
         <TodoItem
           key={todo.id}
           {...actions}

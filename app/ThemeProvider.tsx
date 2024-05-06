@@ -77,12 +77,14 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     setIsMounted(true);
     const userSetPreference = localStorage.getItem(themeKey) as Theme;
+    let newTheme = theme;
     if (userSetPreference !== null) {
-      setTheme(userSetPreference);
+      newTheme = userSetPreference;
     } else {
-      const mediaQueryPreference = getMediaQueryPreference();
-      setTheme(mediaQueryPreference);
+      newTheme = getMediaQueryPreference();
     }
+    setTheme(newTheme);
+    document.body.setAttribute("data-theme", newTheme);
 
     return () => {
       setIsMounted(false);
@@ -95,19 +97,19 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const changeTheme = (newTheme: Theme) => {
     setTheme(newTheme);
+    document.body.setAttribute("data-theme", newTheme);
     localStorage.setItem(themeKey, newTheme);
   };
 
   return (
     <ThemeContext.Provider value={{ theme, changeTheme }}>
-      <div data-theme={theme}>{children}</div>
+      {children}
     </ThemeContext.Provider>
   );
 };
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  return context;
+  return useContext(ThemeContext);
 };
 
 export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {

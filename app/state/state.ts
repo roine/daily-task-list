@@ -16,16 +16,24 @@ export type Todo = {
   children: Todo[];
 };
 
-export type State = {
+export type TodoListState = {
   todoTitle: string;
   globalError: string | null;
   frequencySelected: Frequency;
   todos: Todo[];
 };
 
+export type State = {
+  todoLists: TodoListState[];
+};
+
 export const initialState: State = {
-  frequencySelected: "Daily",
-  todoTitle: "Untitled",
-  globalError: null,
-  todos: [],
+  todoLists: [
+    {
+      frequencySelected: "Daily",
+      todoTitle: "Untitled",
+      globalError: null,
+      todos: [],
+    },
+  ],
 };

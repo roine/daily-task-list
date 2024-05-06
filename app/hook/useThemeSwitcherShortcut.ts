@@ -21,8 +21,10 @@ export const useThemeSwitcherShortcut = () => {
       if (document.activeElement !== document.body) {
         return;
       }
+
       if (e.altKey) {
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
           const themes = darkThemes.includes(theme) ? darkThemes : lightThemes;
           const findFunction =
             e.key === "ArrowDown" ? findNextInArray : findPreviousInArray;
@@ -30,9 +32,11 @@ export const useThemeSwitcherShortcut = () => {
           // @ts-ignore
           changeTheme(nextTheme);
         } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
           // @ts-ignore
           changeTheme(lastLightTheme);
         } else if (e.key === "ArrowRight") {
+          e.preventDefault();
           // @ts-ignore
           changeTheme(lastDarkTheme);
         }

@@ -1,4 +1,4 @@
-import { Todo } from "./state/state";
+import { Todo } from "../state/state";
 import { getTodoActions } from "@/state/reducer/todoReducer";
 import classNames from "classnames";
 import { isTouchScreen } from "@/helper/device";
@@ -17,13 +17,13 @@ export const TodoItem = (todo: TodoItemProps) => {
   return (
     <li
       className={classNames(
-        "list-none relative",
+        "list-none relative text",
         {
           "border-l-2 border-accent border-solid shadow-inner print:border-none":
             todo.selected && !isTouchScreen(),
         },
         { "active:bg-accent/5": isTouchScreen() && distance < 0.2 },
-        { "active:bg-red-200": isTouchScreen() && distance >= 0.2 },
+        { "bg-red-600 text-black": isTouchScreen() && distance >= 0.2 },
         {
           "border-l-2 border-transparent border-solid": !todo.selected,
         },
@@ -42,7 +42,7 @@ export const TodoItem = (todo: TodoItemProps) => {
           }
         }}
       >
-        <span className="flex gap-3 align-items-center py-5 lg:py-3  px-3 print:py-1">
+        <span className="flex gap-3 align-items-center py-4 lg:py-3 px-3 print:py-1">
           <input
             tabIndex={-1}
             type="checkbox"

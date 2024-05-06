@@ -19,27 +19,32 @@ export const frequencyReducer = (
     case "SET_NEXT_FREQUENCY":
       const nextFrequency = findNextInArray(
         frequency,
-        state.frequencySelected,
+        state.todoLists[0].frequencySelected,
         { cycle: true },
       );
       if (nextFrequency != null) {
         return {
-          ...state,
-          frequencySelected: nextFrequency,
+          todoLists: state.todoLists.map((todoList) => ({
+            ...todoList,
+            frequencySelected: nextFrequency,
+          })),
         };
       }
+
       return state;
 
     case "SET_PREV_FREQUENCY":
       const prevFrequency = findPreviousInArray(
         frequency,
-        state.frequencySelected,
+        state.todoLists[0].frequencySelected,
         { cycle: true },
       );
       if (prevFrequency != null) {
         return {
-          ...state,
-          frequencySelected: prevFrequency,
+          todoLists: state.todoLists.map((todoList) => ({
+            ...todoList,
+            frequencySelected: prevFrequency,
+          })),
         };
       }
       return state;

@@ -39,43 +39,53 @@ export type TodoAction =
   | DeleteTodoAction
   | ChangeTodoTitleAction;
 
-export const todoReducer = (state: State, action: TodoAction) => {
+export const todoReducer = (state: State, action: TodoAction): State => {
   switch (action.type) {
     case "ADD_TODOS":
       return {
-        ...state,
-        todos: action.payload.todos,
+        todoLists: state.todoLists.map((todoList) => ({
+          ...todoList,
+          todos: action.payload.todos,
+        })),
       };
 
     case "ADD_TODO":
       return {
-        ...state,
-        todos: [...state.todos, action.payload.todo],
+        todoLists: state.todoLists.map((todoList) => ({
+          ...todoList,
+          todos: [...todoList.todos, action.payload.todo],
+        })),
       };
 
     case "TOGGLE_COMPLETED_TODO":
       return {
-        ...state,
-        todos: state.todos.map((todo) =>
-          todo.id === action.payload.id
-            ? {
-                ...todo,
-                completedDate: todo.completedDate == null ? new Date() : null,
-              }
-            : todo,
-        ),
+        todoLists: state.todoLists.map((todoList) => ({
+          ...todoList,
+          todos: todoList.todos.map((todo) =>
+            todo.id === action.payload.id
+              ? {
+                  ...todo,
+                  completedDate: todo.completedDate == null ? new Date() : null,
+                }
+              : todo,
+          ),
+        })),
       };
 
     case "DELETE_TODO":
       return {
-        ...state,
-        todos: state.todos.filter((todo) => todo.id !== action.payload.id),
+        todoLists: state.todoLists.map((todoList) => ({
+          ...todoList,
+          todos: todoList.todos.filter((todo) => todo.id !== action.payload.id),
+        })),
       };
 
     case "CHANGE_TODO_TITLE":
       return {
-        ...state,
-        todoTitle: action.payload.title,
+        todoLists: state.todoLists.map((todoList) => ({
+          ...todoList,
+          todoTitle: action.payload.title,
+        })),
       };
   }
 };
@@ -83,9 +93,12 @@ export const todoReducer = (state: State, action: TodoAction) => {
 export const getTodoActions = (dispatch: (action: TodoAction) => void) => ({
   getTodos: async () => {
     return getTodos()
-      .then(({ todos, title }) => {
-        dispatch({ type: "ADD_TODOS", payload: { todos } });
-        dispatch({ type: "CHANGE_TODO_TITLE", payload: { title } });
+      .then(({ todoLists }) => {
+        dispatch({ type: "ADD_TODOS", payload: { todos: todoLists[0].todos } });
+        dispatch({
+          type: "CHANGE_TODO_TITLE",
+          payload: { title: todoLists[0].title },
+        });
       })
       .catch(() => {
         // nothing for now

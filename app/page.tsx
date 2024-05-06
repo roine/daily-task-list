@@ -1,11 +1,11 @@
 "use client";
-import { TodolistTitle } from "@/TodolistTile";
-import { AppStateProvider } from "@/state/AppStateProvider";
-import Todolist from "@/Todolist";
-import React from "react";
-import { TodoCreate } from "@/TodoCreate";
+import { TodolistTitle } from "@/ui/TodolistTile";
+import Todolist from "@/ui/Todolist";
+import React, { useEffect } from "react";
+import { TodoCreate } from "@/ui/TodoCreate";
+import { useAppState } from "@/state/AppStateProvider";
 
-export default function Home() {
+export default function Page() {
   return (
     <>
       <TodolistTitle />

@@ -3,9 +3,10 @@ import { v4 as uuidv4 } from "uuid";
 
 const todoStateKey = "todos";
 
+type TodoList = { todos: Todo[]; title: string };
+
 type DataStructure = {
-  todos: Todo[];
-  title: string;
+  todoLists: TodoList[];
 };
 
 /**
@@ -39,9 +40,11 @@ const getData = (): [
 
 export const addTodo = async (todo: Todo): Promise<Todo> => {
   const [stored, updateData] = getData();
-  const todos: Todo[] = stored?.todos ?? [];
-  const updatedTodos = [...todos, todo];
-  updateData({ todos: updatedTodos });
+  const todoLists: TodoList[] = stored?.todoLists ?? [];
+  const updatedTodos = [...todoLists[0].todos, todo];
+  updateData({
+    todoLists: todoLists.map((tl) => ({ ...tl, todos: updatedTodos })),
+  });
   return todo;
 };
 
@@ -49,9 +52,11 @@ export const deleteTodo = async (
   todoId: Todo["id"],
 ): Promise<{ deleted: boolean }> => {
   const [stored, updateData] = getData();
-  const todos: Todo[] = stored?.todos ?? [];
-  const updatedTodos = todos.filter((todo) => todo.id !== todoId);
-  updateData({ todos: updatedTodos });
+  const todoLists: TodoList[] = stored?.todoLists ?? [];
+  const updatedTodos = todoLists[0].todos.filter((todo) => todo.id !== todoId);
+  updateData({
+    todoLists: todoLists.map((tl) => ({ ...tl, todos: updatedTodos })),
+  });
   return { deleted: true };
 };
 
@@ -107,36 +112,45 @@ const todosForPresentation: Todo[] = [
   },
 ];
 
+const todoListForPresentation: DataStructure = {
+  todoLists: [{ title: "Untitled", todos: todosForPresentation }],
+};
+
 export const getTodos = async (): Promise<DataStructure> => {
   const [stored, updateData] = getData();
-  const todos: Todo[] = stored?.todos ?? todosForPresentation;
-  const title = stored?.title ?? "Untitled";
-
-  if (!stored?.todos) {
-    updateData({ todos: todosForPresentation });
+  const todoLists: TodoList[] =
+    stored?.todoLists ?? todoListForPresentation.todoLists;
+  if (!stored?.todoLists) {
+    updateData({ todoLists: todoLists });
   }
 
-  return { todos, title };
+  return { todoLists };
 };
 
 export const toggleCompletedTodo = async (
   id: Todo["id"],
 ): Promise<Todo["id"]> => {
   const [stored, updateData] = getData();
-  const todos: Todo[] = stored ? stored.todos : [];
+  const todoLists: TodoList[] = stored ? stored.todoLists : [];
 
-  const updatedTodos = todos.map((t) =>
+  const updatedTodos = todoLists[0].todos.map((t) =>
     t.id === id
       ? { ...t, completedDate: t.completedDate == null ? new Date() : null }
       : t,
   );
 
-  updateData({ todos: updatedTodos });
+  updateData({
+    todoLists: todoLists.map((tl) => ({ ...tl, todos: updatedTodos })),
+  });
   return id;
 };
 
 export const updateTodolistTitle = async (title: string): Promise<string> => {
-  const [_, updateData] = getData();
-  updateData({ title });
+  const [stored, updateData] = getData();
+  const todoLists: TodoList[] = stored ? stored.todoLists : [];
+
+  updateData({
+    todoLists: todoLists.map((tl) => ({ ...tl, title })),
+  });
   return title;
 };
