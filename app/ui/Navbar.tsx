@@ -1,6 +1,7 @@
 import { ThemeSwitcher } from "@/ThemeProvider";
 import React from "react";
 import { useAuth } from "@/auth/AuthProvider";
+import classNames from "classnames";
 
 export default function Navbar() {
   const { loggedIn, signOut } = useAuth();
@@ -9,7 +10,7 @@ export default function Navbar() {
     <div className="navbar bg-base-100 max-w-4xl mx-auto px-0">
       <div className="flex-1">
         <div className="navbar-start">
-          <div className="dropdown">
+          <div className="dropdown -ml-3">
             <div
               tabIndex={0}
               role="button"
@@ -38,6 +39,13 @@ export default function Navbar() {
                 <li>
                   <a href="#" onClick={signOut}>
                     Sign out
+                  </a>
+                </li>
+              )}
+              {!loggedIn && (
+                <li>
+                  <a href={`${process.env.NEXT_PUBLIC_AUTH_SERVER_URL}`}>
+                    Sign in
                   </a>
                 </li>
               )}

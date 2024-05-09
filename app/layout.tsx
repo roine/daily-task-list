@@ -26,13 +26,19 @@ export default async function RootLayout({
   children: ReactNode;
 }>) {
   let user = null;
+
   try {
-    user = await fetch(`${process.env.API_SERVER_URL}/api/user`, {
+    const response = await fetch(`${process.env.API_SERVER_URL}/api/user`, {
       headers: {
         Cookie: cookies(),
       },
     }).then((r) => r.json());
-  } catch {}
+
+    if (response.error) throw new Error(response.error);
+    user = response;
+  } catch (e) {
+    console.error(e);
+  }
 
   return (
     <html lang="en">

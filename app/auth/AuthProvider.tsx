@@ -24,7 +24,9 @@ export const AuthProvider = ({ children, user }: AuthProviderProps) => {
     user: user,
     loggedIn: user != null,
     signOut: () =>
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, { method: "POST" }),
+      window.location.replace(
+        `${process.env.NEXT_PUBLIC_AUTH_SERVER_URL}/auth/logout`,
+      ),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
