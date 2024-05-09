@@ -18,7 +18,10 @@ export const errorReducer = (state: State, action: ErrorAction): State => {
   }
 };
 
-export const getErrorActions = (dispatch: (action: ErrorAction) => void) => ({
+export const getErrorActions = (
+  dispatch: (action: ErrorAction) => void,
+  _loggedIn: boolean,
+) => ({
   updateGlobalError: (error: string | null) => {
     dispatch({ type: "UPDATE_GLOBAL_ERROR", payload: error });
     setTimeout(() => {

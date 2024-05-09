@@ -53,6 +53,7 @@ export const frequencyReducer = (
 
 export const getFrequencyActions = (
   dispatch: (props: FrequencyAction) => void,
+  _loggedIn: boolean,
 ) => {
   return {
     setNextFrequency: () => dispatch({ type: "SET_NEXT_FREQUENCY" }),

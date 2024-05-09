@@ -4,7 +4,7 @@ import { Todo } from "@/state/state";
 
 type Callbacks = {
   onPressEnter?: (selectedTodoId: string) => void;
-  onPressBackspace?: (selectedTodoId: string) => Promise<{ deleted?: boolean }>;
+  onPressBackspace?: (selectedTodoId: string) => void;
 };
 
 /**
@@ -55,25 +55,18 @@ export const useListNavigation = <T extends { id: string }[]>(
 
     if (e.key === "Backspace" && onPressBackspace != null) {
       e.preventDefault();
-      onPressBackspace(selectedTodoId).then(({ deleted }) => {
-        /**
-         * If we are deleting then we need to move to another selected item
-         */
-        if (!deleted) {
-          return;
-        }
-        const nextTodo = findNextInArray(list, selectedTodo, { trackBy: "id" });
-        const prevTodo = findPreviousInArray(list, selectedTodo, {
-          trackBy: "id",
-        });
-        if (nextTodo) {
-          setSelectedTodoId(nextTodo.id);
-        } else if (prevTodo) {
-          setSelectedTodoId(prevTodo.id);
-        } else {
-          setSelectedTodoId(null);
-        }
+      onPressBackspace(selectedTodoId);
+      const nextTodo = findNextInArray(list, selectedTodo, { trackBy: "id" });
+      const prevTodo = findPreviousInArray(list, selectedTodo, {
+        trackBy: "id",
       });
+      if (nextTodo) {
+        setSelectedTodoId(nextTodo.id);
+      } else if (prevTodo) {
+        setSelectedTodoId(prevTodo.id);
+      } else {
+        setSelectedTodoId(null);
+      }
     }
     if ((e.key === "Enter" || e.key === " ") && onPressEnter != null) {
       e.preventDefault();

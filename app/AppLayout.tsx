@@ -18,8 +18,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <div>
       <Navbar />
-      <main className="relative mx-auto max-w-4xl py-0 px-2 lg:px-0 flex flex-col">
-        {state.todoLists[0].globalError != null && (
+      <main className="relative mx-auto max-w-4xl pt-0 pb-6 px-2 lg:px-0 flex flex-col">
+        {state.todoLists[0]?.globalError != null && (
           <Alert className="mb-4" variant="error">
             {state.todoLists[0].globalError}
           </Alert>

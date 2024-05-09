@@ -21,8 +21,8 @@ type AuthProviderProps = {
 
 export const AuthProvider = ({ children, user }: AuthProviderProps) => {
   const value = {
-    user: user?.data?.user ?? null,
-    loggedIn: user?.data?.user !== null,
+    user: user,
+    loggedIn: user != null,
     signOut: () =>
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, { method: "POST" }),
   };
@@ -37,5 +37,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-const useSyncExternalStore = () => {};

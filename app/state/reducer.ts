@@ -15,34 +15,44 @@ import {
   getFrequencyActions,
 } from "@/state/reducer/frequencyReducer";
 
-type Action =
-  | { _tag: "Todo"; action: TodoAction }
-  | { _tag: "Error"; action: ErrorAction }
-  | { _tag: "Frequency"; action: FrequencyAction };
+const Frequency = Symbol();
+const Todo = Symbol();
+const Err = Symbol();
+
+export type Action =
+  | { _tag: typeof Todo; action: TodoAction }
+  | { _tag: typeof Err; action: ErrorAction }
+  | { _tag: typeof Frequency; action: FrequencyAction };
 
 export const reducer = (state: State = initialState, action: Action): State => {
   switch (action._tag) {
-    case "Todo":
+    case Todo:
       return todoReducer(state, action.action);
-    case "Error":
+    case Err:
       return errorReducer(state, action.action);
-    case "Frequency":
+    case Frequency:
       return frequencyReducer(state, action.action);
     default:
       return state;
   }
 };
 
-export const getActions = (dispatch: (props: Action) => void) => {
+export const getActions = (
+  dispatch: (props: Action) => void,
+  loggedIn: boolean,
+) => {
   return {
-    ...getTodoActions((action: TodoAction) =>
-      dispatch({ action, _tag: "Todo" }),
+    ...getTodoActions(
+      (action: TodoAction) => dispatch({ action, _tag: Todo }),
+      loggedIn,
     ),
-    ...getErrorActions((action: ErrorAction) =>
-      dispatch({ action, _tag: "Error" }),
+    ...getErrorActions(
+      (action: ErrorAction) => dispatch({ action, _tag: Err }),
+      loggedIn,
     ),
-    ...getFrequencyActions((action: FrequencyAction) =>
-      dispatch({ action, _tag: "Frequency" }),
+    ...getFrequencyActions(
+      (action: FrequencyAction) => dispatch({ action, _tag: Frequency }),
+      loggedIn,
     ),
   };
 };

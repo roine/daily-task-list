@@ -1,11 +1,6 @@
-import { initialState, State, Todo } from "@/state/state";
-import {
-  addTodo,
-  deleteTodo,
-  getTodos,
-  toggleCompletedTodo,
-  updateTodolistTitle,
-} from "@/storage/localstorage";
+import { State, Todo, TodoListState } from "@/state/state";
+import { BrowserStorage } from "@/storage/localstorage";
+import { RemoteStorage } from "@/storage/remoteStorage";
 
 type AddTodosAction = {
   type: "ADD_TODOS";
@@ -32,14 +27,21 @@ type ChangeTodoTitleAction = {
   payload: { title: string };
 };
 
+type setListAction = {
+  type: "SET_LIST";
+  payload: { data: Pick<TodoListState, "id" | "todoTitle" | "position"> };
+};
+
 export type TodoAction =
   | AddTodosAction
   | AddTodoAction
   | ToggleTodoAction
   | DeleteTodoAction
-  | ChangeTodoTitleAction;
+  | ChangeTodoTitleAction
+  | setListAction;
 
 export const todoReducer = (state: State, action: TodoAction): State => {
+  console.log(action);
   switch (action.type) {
     case "ADD_TODOS":
       return {
@@ -87,55 +89,58 @@ export const todoReducer = (state: State, action: TodoAction): State => {
           todoTitle: action.payload.title,
         })),
       };
+
+    case "SET_LIST":
+      return {
+        todoLists: state.todoLists.map((todoList) => ({
+          ...todoList,
+          id: action.payload.data.id,
+          todoTitle: action.payload.data.todoTitle,
+          position: action.payload.data.position,
+        })),
+      };
   }
 };
 
-export const getTodoActions = (dispatch: (action: TodoAction) => void) => ({
-  getTodos: async () => {
-    return getTodos()
-      .then(({ todoLists }) => {
-        dispatch({ type: "ADD_TODOS", payload: { todos: todoLists[0].todos } });
-        dispatch({
-          type: "CHANGE_TODO_TITLE",
-          payload: { title: todoLists[0].title },
-        });
-      })
-      .catch(() => {
-        // nothing for now
-      });
+export const getTodoActions = (
+  dispatch: (action: TodoAction) => void,
+  loggedIn: boolean,
+) => ({
+  loadLocallyStoredTodos: async () => {
+    const { todoLists } = BrowserStorage.getTodos();
+    dispatch({ type: "ADD_TODOS", payload: { todos: todoLists[0].todos } });
+    dispatch({
+      type: "SET_LIST",
+      payload: {
+        data: {
+          id: todoLists[0].id,
+          todoTitle: todoLists[0].title,
+          position: todoLists[0].position,
+        },
+      },
+    });
   },
 
-  addTodo: (todo: Todo) => {
+  addTodo: (todo: Todo, listId: string) => {
     dispatch({ type: "ADD_TODO", payload: { todo } });
-
-    addTodo(todo).catch(() => {
-      dispatch({ type: "DELETE_TODO", payload: { id: todo.id } });
-      // getErrorActions(dispatch).updateGlobalError(
-      //   "Something went wrong. Could not add todo",
-      // );
-    });
+    BrowserStorage.addTodo(todo);
+    loggedIn && RemoteStorage.addTodo(todo, listId).then(console.log);
   },
 
   toggleCompletedTodo: (id: Todo["id"]) => {
     dispatch({ type: "TOGGLE_COMPLETED_TODO", payload: { id } });
-    toggleCompletedTodo(id).catch(() => {
-      dispatch({ type: "TOGGLE_COMPLETED_TODO", payload: { id: id } });
-      // getErrorActions(dispatch).updateGlobalError(
-      //   "Something went wrong. Could not add todo",
-      // );
-    });
+    BrowserStorage.toggleCompletedTodo(id);
   },
 
-  deleteTodo: (id: Todo["id"]): ReturnType<typeof deleteTodo> => {
+  deleteTodo: (
+    id: Todo["id"],
+  ): ReturnType<typeof BrowserStorage.deleteTodo> => {
     dispatch({ type: "DELETE_TODO", payload: { id } });
-    return deleteTodo(id);
+    return BrowserStorage.deleteTodo(id);
   },
 
   changeTodoTitle: (title: string) => {
     dispatch({ type: "CHANGE_TODO_TITLE", payload: { title } });
-    updateTodolistTitle(title).catch(() => {
-      // @todo
-      dispatch({ type: "CHANGE_TODO_TITLE", payload: { title: "Untitled" } });
-    });
+    BrowserStorage.updateTodolistTitle(title);
   },
 });

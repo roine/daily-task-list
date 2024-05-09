@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 export const frequency = [
   "Daily",
   "Weekly",
@@ -13,11 +15,14 @@ export type Todo = {
   text: string;
   completedDate: Date | null;
   frequency: Frequency;
+  position: number;
   children: Todo[];
 };
 
 export type TodoListState = {
+  id: string;
   todoTitle: string;
+  position: number;
   globalError: string | null;
   frequencySelected: Frequency;
   todos: Todo[];
@@ -30,8 +35,10 @@ export type State = {
 export const initialState: State = {
   todoLists: [
     {
+      id: uuidv4(),
       frequencySelected: "Daily",
-      todoTitle: "Untitled",
+      position: 0,
+      todoTitle: "",
       globalError: null,
       todos: [],
     },

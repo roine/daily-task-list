@@ -26,13 +26,17 @@ export const TodoCreate = () => {
     }
     // add an item when press enter
     if (e.key === "Enter") {
-      actions.addTodo({
-        id: uuidv4(),
-        text: e.currentTarget.value,
-        completedDate: null,
-        frequency: state.todoLists[0].frequencySelected,
-        children: [],
-      });
+      actions.addTodo(
+        {
+          id: uuidv4(),
+          position: 100,
+          text: e.currentTarget.value,
+          completedDate: null,
+          frequency: state.todoLists[0].frequencySelected,
+          children: [],
+        },
+        state.todoLists[0].id,
+      );
       if (inputEl.current != null) {
         inputEl.current.value = "";
       }

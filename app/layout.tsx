@@ -25,15 +25,23 @@ export default async function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const user = await fetch(`${process.env.API_SERVER_URL}/api/user`, {
-    headers: {
-      Cookie: cookies(),
-    },
-  }).then((r) => r.json());
+  let user = null;
+  try {
+    user = await fetch(`${process.env.API_SERVER_URL}/api/user`, {
+      headers: {
+        Cookie: cookies(),
+      },
+    }).then((r) => r.json());
+  } catch {}
 
   return (
     <html lang="en">
-      <body className={classNames(roboto.className, "flex flex-col")}>
+      <body
+        className={classNames(
+          roboto.className,
+          "flex flex-col min-h-screen min-w-screen",
+        )}
+      >
         <ThemeProvider>
           <Suspense fallback={<div>Loading...</div>}>
             <AuthProvider user={user}>
