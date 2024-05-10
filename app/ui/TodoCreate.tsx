@@ -45,33 +45,39 @@ export const TodoCreate = () => {
     else if (e.key === "ArrowDown") {
       e.preventDefault();
 
-      startTransition(async () => {
-        await new Promise((resolve) => {
+      startTransition(() => {
+        new Promise((resolve) => {
           setTimeout(() => resolve(1), 150);
+        }).then(() => {
+          actions.setNextFrequency();
         });
-        actions.setNextFrequency();
       });
 
       direction.current = "Down";
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
 
-      startTransition(async () => {
-        await new Promise((resolve) => {
+      startTransition(() => {
+        new Promise((resolve) => {
           setTimeout(() => resolve(1), 150);
+        }).then(() => {
+          actions.setPrevFrequency();
         });
-        actions.setPrevFrequency();
       });
 
       direction.current = "Up";
     }
   };
 
-  const handleClickFrequency = (e) => {
+  const handleClickFrequency: React.MouseEventHandler<
+    HTMLButtonElement
+  > = () => {
     actions.setNextFrequency();
   };
 
-  const handleFrequencyInfoActive = (e) => {
+  const handleFrequencyInfoActive: React.MouseEventHandler<
+    HTMLButtonElement
+  > = (e) => {
     e.stopPropagation();
     // opens a drawer with information about the frequency
   };

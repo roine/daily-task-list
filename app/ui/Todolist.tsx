@@ -41,7 +41,6 @@ export default function Todolist() {
       position: tl.position,
     }));
     const synchroniseWithStorage = async () => {
-      console.log(process.env.API_SERVER_URL);
       await fetch(`/api/lists/synchronise`, {
         credentials: "include",
         body: JSON.stringify({ todoLists }),
