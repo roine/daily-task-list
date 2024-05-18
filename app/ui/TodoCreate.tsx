@@ -45,68 +45,37 @@ export const TodoCreate = () => {
     else if (e.key === "ArrowDown") {
       e.preventDefault();
 
-      startTransition(() => {
-        new Promise((resolve) => {
-          setTimeout(() => resolve(1), 150);
-        }).then(() => {
-          actions.setNextFrequency();
+      startTransition(async () => {
+        await new Promise((resolve) => {
+          setTimeout(() => resolve(1), 200);
         });
+        actions.setNextFrequency();
       });
 
       direction.current = "Down";
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
 
-      startTransition(() => {
-        new Promise((resolve) => {
-          setTimeout(() => resolve(1), 150);
-        }).then(() => {
-          actions.setPrevFrequency();
+      startTransition(async () => {
+        await new Promise((resolve) => {
+          setTimeout(() => resolve(1), 200);
         });
+        actions.setPrevFrequency();
       });
 
       direction.current = "Up";
     }
   };
 
-  const handleClickFrequency: React.MouseEventHandler<
-    HTMLButtonElement
-  > = () => {
-    actions.setNextFrequency();
-  };
-
-  const handleFrequencyInfoActive: React.MouseEventHandler<
-    HTMLButtonElement
-  > = (e) => {
-    e.stopPropagation();
-    // opens a drawer with information about the frequency
-  };
-
-  const nextFrequency = findNextInArray(
-    frequency,
-    state.todoLists[0].frequencySelected,
-    {
-      cycle: true,
-    },
-  );
-
-  const previousFrequency = findPreviousInArray(
-    frequency,
-    state.todoLists[0].frequencySelected,
-    {
-      cycle: true,
-    },
-  );
-
   return (
-    <span className="flex print:hidden">
+    <span className="print:hidden relative mb-3 lg:mb-12">
       <input
         onKeyDown={handleInputKeydown}
         ref={inputEl}
         type="text"
         placeholder="Press / to focus"
         className={classNames(
-          "flex-grow rounded-none w-full mb-3 lg:mb-12 p-2 lg:p-4 outline-none border-b-2 border-b-solid border-b-accent",
+          "flex-grow rounded-none w-full p-2 lg:p-4 outline-none border-b-2 border-b-solid border-b-accent",
           "transition-all duration-150 ease-in px-4",
           state.todoLists[0].frequencySelected === "Daily" &&
             "bg-emerald-400/5 border-b-emerald-400 focus:border-b-emerald-800",
@@ -120,87 +89,122 @@ export const TodoCreate = () => {
             "bg-stone-400/5 border-b-stone-400 focus:border-b-stone-800",
         )}
       />
-      <span className="relative">
-        <span
-          key="next-frequency"
-          className={classNames(
-            "absolute top-2 lg:top-4 right-4 -translate-y-4 opacity-0",
-            nextFrequency === "Daily" && "text-emerald-400",
-            nextFrequency === "Weekly" && "text-red-400",
-            nextFrequency === "Monthly" && "text-amber-400",
-            nextFrequency === "Yearly" && "text-blue-400",
-            nextFrequency === "Once" && "text-stone-400",
-            isPending &&
-              direction.current === "Down" &&
-              "translate-y-0 opacity-100 transition-all duration-150 ease-out",
-          )}
-        >
-          <div className="flex items-center gap-2">
-            {nextFrequency}
-            {nextFrequency !== "Once" && nextFrequency !== "Daily" && (
-              <InfoIcon />
-            )}
-          </div>
-        </span>
-        <span
-          key="current-frequency"
-          className={classNames(
-            "absolute top-2 lg:top-4 right-4 opacity-100 cursor-pointer",
+      <FrequencyButton
+        onSetNextFrequency={actions.setNextFrequency}
+        inputEl={inputEl.current}
+        frequencySelected={state.todoLists[0].frequencySelected}
+        direction={direction.current}
+        isPending={isPending}
+      ></FrequencyButton>
+    </span>
+  );
+};
 
-            state.todoLists[0].frequencySelected === "Daily" &&
-              "text-emerald-400",
-            state.todoLists[0].frequencySelected === "Weekly" && "text-red-400",
-            state.todoLists[0].frequencySelected === "Monthly" &&
-              "text-amber-400",
-            state.todoLists[0].frequencySelected === "Yearly" &&
-              "text-blue-400",
-            state.todoLists[0].frequencySelected === "Once" && "text-stone-400",
-            direction.current === "Up" &&
-              isPending &&
-              "-translate-y-2 lg:-translate-y-4 opacity-0 transition-all duration-150 ease-in",
-            direction.current === "Down" &&
-              isPending &&
-              "translate-y-2 lg:translate-y-4 opacity-0 transition-all  duration-150 ease-in",
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <button onClick={handleClickFrequency}>
-              {state.todoLists[0].frequencySelected}
-            </button>
+type FrequencyButtonProps = {
+  onSetNextFrequency: () => void;
+  direction: "Up" | "Down";
+  inputEl: HTMLInputElement | null;
+  isPending: boolean;
+  frequencySelected: Frequency;
+};
 
-            {state.todoLists[0].frequencySelected !== "Once" &&
-              state.todoLists[0].frequencySelected !== "Daily" && (
-                <button
-                  className="text-xs"
-                  aria-label="info"
-                  onClick={handleFrequencyInfoActive}
-                >
-                  <InfoIcon />
-                </button>
-              )}
-          </div>
-        </span>
-        <span
-          key="prev-frequency"
-          className={classNames(
-            "absolute top-2 lg:top-4 right-4 translate-y-4 opacity-0",
-            previousFrequency === "Daily" && "text-emerald-400",
-            previousFrequency === "Weekly" && "text-red-400",
-            previousFrequency === "Monthly" && "text-amber-400",
-            previousFrequency === "Yearly" && "text-blue-400",
-            previousFrequency === "Once" && "text-stone-400",
+const FrequencyButton = ({
+  direction,
+  isPending,
+  frequencySelected,
+  onSetNextFrequency,
+}: FrequencyButtonProps) => {
+  const nextFrequency = findNextInArray(frequency, frequencySelected, {
+    cycle: true,
+  });
+
+  const previousFrequency = findPreviousInArray(frequency, frequencySelected, {
+    cycle: true,
+  });
+
+  const handleClickFrequency: React.MouseEventHandler<
+    HTMLButtonElement
+  > = () => {
+    onSetNextFrequency();
+  };
+
+  const handleFrequencyInfoActive: React.MouseEventHandler<
+    HTMLButtonElement
+  > = (e) => {
+    e.stopPropagation();
+    // opens a drawer with information about the frequency
+  };
+
+  return (
+    <span className="absolute flex flex-col top-2/4 right-2 lg:right-4 -translate-y-1/2 items-end">
+      <span
+        key="next-frequency"
+        className={classNames(
+          "opacity-0",
+          nextFrequency === "Daily" && "text-emerald-400",
+          nextFrequency === "Weekly" && "text-red-400",
+          nextFrequency === "Monthly" && "text-amber-400",
+          nextFrequency === "Yearly" && "text-blue-400",
+          nextFrequency === "Once" && "text-stone-400",
+          isPending &&
+            direction === "Down" &&
+            "translate-y-full opacity-100 transition-all duration-200 ease-out",
+        )}
+      >
+        <div className="flex items-center gap-2">
+          {nextFrequency}
+          <InfoIcon />
+        </div>
+      </span>
+
+      <span
+        key="current-frequency"
+        className={classNames(
+          "opacity-100 cursor-pointer",
+          frequencySelected === "Daily" && "text-emerald-400",
+          frequencySelected === "Weekly" && "text-red-400",
+          frequencySelected === "Monthly" && "text-amber-400",
+          frequencySelected === "Yearly" && "text-blue-400",
+          frequencySelected === "Once" && "text-stone-400",
+          direction === "Up" &&
             isPending &&
-              direction.current === "Up" &&
-              "translate-y-1 opacity-100 transition-all duration-150 ease-out",
-          )}
-        >
-          <div className="flex items-center gap-2">
-            {previousFrequency}
-            {previousFrequency !== "Once" && previousFrequency !== "Daily" && (
-              <InfoIcon />
-            )}
-          </div>
-        </span>
+            "-translate-y-full opacity-0 transition-all duration-200 ease-in rotate-6",
+          direction === "Down" &&
+            isPending &&
+            "translate-y-full opacity-0 transition-all duration-200 ease-in -rotate-6",
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <button onClick={handleClickFrequency}>{frequencySelected}</button>
+
+          <button
+            className="text-xs"
+            aria-label="info"
+            onClick={handleFrequencyInfoActive}
+          >
+            <InfoIcon />
+          </button>
+        </div>
+      </span>
+
+      <span
+        key="prev-frequency"
+        className={classNames(
+          "opacity-0",
+          previousFrequency === "Daily" && "text-emerald-400",
+          previousFrequency === "Weekly" && "text-red-400",
+          previousFrequency === "Monthly" && "text-amber-400",
+          previousFrequency === "Yearly" && "text-blue-400",
+          previousFrequency === "Once" && "text-stone-400",
+          isPending &&
+            direction === "Up" &&
+            "-translate-y-full opacity-100 transition-all duration-200 ease-out",
+        )}
+      >
+        <div className="flex items-center gap-2">
+          {previousFrequency}
+          <InfoIcon />
+        </div>
       </span>
     </span>
   );

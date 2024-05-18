@@ -16,10 +16,11 @@ export const AuthContext = React.createContext<null | {
 
 type AuthProviderProps = {
   children: React.ReactNode;
-  user: UserResponse | null;
 };
 
-export const AuthProvider = ({ children, user }: AuthProviderProps) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const user = null;
+  // todo
   const value = {
     user: user,
     loggedIn: user != null,
