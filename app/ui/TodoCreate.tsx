@@ -18,9 +18,10 @@ export const TodoCreate = () => {
   const [state, actions] = useAppState();
   useFocusInputOnKey(inputEl, "/");
   const direction = useRef<"Up" | "Down">("Down");
-  const [isPending, startTransition] = useTransition();
-
-  const handleInputKeydown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+  const [transitioning, setTransitioning] = useState(false);
+  const handleInputKeydown: KeyboardEventHandler<HTMLInputElement> = async (
+    e,
+  ) => {
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
       return;
     }
@@ -44,26 +45,22 @@ export const TodoCreate = () => {
     // navigate the frequency on up and down
     else if (e.key === "ArrowDown") {
       e.preventDefault();
-
-      startTransition(async () => {
-        await new Promise((resolve) => {
-          setTimeout(() => resolve(1), 200);
-        });
-        actions.setNextFrequency();
-      });
-
       direction.current = "Down";
+      setTransitioning(true);
+      await new Promise((resolve) => {
+        setTimeout(() => resolve(1), 200);
+      });
+      actions.setNextFrequency();
+      setTransitioning(false);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-
-      startTransition(async () => {
-        await new Promise((resolve) => {
-          setTimeout(() => resolve(1), 200);
-        });
-        actions.setPrevFrequency();
-      });
-
       direction.current = "Up";
+      setTransitioning(true);
+      await new Promise((resolve) => {
+        setTimeout(() => resolve(1), 200);
+      });
+      actions.setPrevFrequency();
+      setTransitioning(false);
     }
   };
 
@@ -76,7 +73,7 @@ export const TodoCreate = () => {
         placeholder="Press / to focus"
         className={classNames(
           "flex-grow rounded-none w-full p-2 lg:p-4 outline-none border-b-2 border-b-solid border-b-accent",
-          "transition-all duration-150 ease-in px-4",
+          "px-4",
           state.todoLists[0].frequencySelected === "Daily" &&
             "bg-emerald-400/5 border-b-emerald-400 focus:border-b-emerald-800",
           state.todoLists[0].frequencySelected === "Weekly" &&
@@ -94,7 +91,7 @@ export const TodoCreate = () => {
         inputEl={inputEl.current}
         frequencySelected={state.todoLists[0].frequencySelected}
         direction={direction.current}
-        isPending={isPending}
+        isPending={transitioning}
       ></FrequencyButton>
     </span>
   );
@@ -160,18 +157,19 @@ const FrequencyButton = ({
       <span
         key="current-frequency"
         className={classNames(
-          "opacity-100 cursor-pointer",
+          "cursor-pointer",
           frequencySelected === "Daily" && "text-emerald-400",
           frequencySelected === "Weekly" && "text-red-400",
           frequencySelected === "Monthly" && "text-amber-400",
           frequencySelected === "Yearly" && "text-blue-400",
           frequencySelected === "Once" && "text-stone-400",
+          !isPending && "opacity-100",
           direction === "Up" &&
             isPending &&
-            "-translate-y-full opacity-0 transition-all duration-200 ease-in rotate-6",
+            "-translate-y-full opacity-0 transition-all duration-200 ease-in rotate-6 scale-75",
           direction === "Down" &&
             isPending &&
-            "translate-y-full opacity-0 transition-all duration-200 ease-in -rotate-6",
+            "translate-y-full opacity-0 transition-all duration-200 ease-in -rotate-6 scale-75",
         )}
       >
         <div className="flex items-center gap-2">
