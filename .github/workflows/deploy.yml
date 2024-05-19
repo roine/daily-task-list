@@ -14,12 +14,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '22'  # Specify the Node.js version
+          node-version: 22.x  # Specify the Node.js version
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -31,7 +31,7 @@ jobs:
         run: pnpm run build
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           # https://github.com/aws-actions/configure-aws-credentials/issues/402
