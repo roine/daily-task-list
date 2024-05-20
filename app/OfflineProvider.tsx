@@ -1,7 +1,4 @@
 "use client";
-/**
- *  React Provider that listens to offline and online and update the provider value accordingly, it should use event listener in useffect
- */
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 

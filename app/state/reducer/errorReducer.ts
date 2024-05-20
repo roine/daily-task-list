@@ -10,6 +10,7 @@ export const errorReducer = (state: State, action: ErrorAction): State => {
   switch (action.type) {
     case "UPDATE_GLOBAL_ERROR":
       return {
+        ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           globalError: action.payload,

@@ -19,7 +19,7 @@ export const TodoItem = (todo: TodoItemProps) => {
       className={classNames(
         "list-none relative text",
         {
-          "border-l-2 border-accent border-solid shadow-inner print:border-none":
+          "border-l-2 border-accent border-solid shadow-inner print:shadow-none print:border-none":
             todo.selected && !isTouchScreen(),
         },
         { "active:bg-accent/5": isTouchScreen() && distance < 0.2 },
@@ -42,18 +42,18 @@ export const TodoItem = (todo: TodoItemProps) => {
           }
         }}
       >
-        <span className="flex gap-3 align-items-center py-4 lg:py-3 px-3 print:py-1">
+        <span className="flex gap-3 align-items-center py-4 lg:py-3 px-3 print:py-1 print:px-0 print:text-black">
           <input
             tabIndex={-1}
             type="checkbox"
-            className="screen:checkbox"
+            className="checkbox"
             checked={isCompleted}
-            onChange={() => todo.toggleCompletedTodo(todo.id)}
+            onChange={() => todo.toggleCompleted(todo.id)}
           />
           <label className="cursor-pointer flex-grow">
             <span className="text-base">{todo.text}</span>
           </label>
-          <span className={"text-sm"}>{todo.frequency}</span>
+          <span className="text-sm print:hidden block">{todo.frequency}</span>
         </span>
       </SwipeableViews>
       <div

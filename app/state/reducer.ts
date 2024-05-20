@@ -56,3 +56,5 @@ export const getActions = (
     ),
   };
 };
+
+export type Actions = ReturnType<typeof getActions>;

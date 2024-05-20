@@ -10,10 +10,8 @@ export default function Todolist() {
   const [state, actions] = useAppState();
   const { loggedIn } = useAuth();
   const handlePressEnter = (selectedTodoId: string) => {
-    actions.toggleCompletedTodo(selectedTodoId);
+    actions.toggleCompleted(selectedTodoId);
   };
-
-  const [loadedFromLocalStorage, setLoadedFromLocalStorage] = useState(false);
 
   const handlePressBackspace = (selectedTodoId: string) => {
     actions.deleteTodo(selectedTodoId);
@@ -24,13 +22,6 @@ export default function Todolist() {
     onPressBackspace: handlePressBackspace,
   });
 
-  // Load the todos
-  useEffect(() => {
-    void actions.loadLocallyStoredTodos().then(() => {
-      setLoadedFromLocalStorage(true);
-    });
-  }, []);
-
   // Synchronise with storage
   useEffect(() => {
     if (!loggedIn) return;
@@ -40,6 +31,7 @@ export default function Todolist() {
       title: tl.todoTitle,
       position: tl.position,
     }));
+
     const synchroniseWithStorage = async () => {
       await fetch(`/api/lists/synchronise`, {
         credentials: "include",
@@ -47,20 +39,9 @@ export default function Todolist() {
         method: "POST",
       });
     };
-    if (loadedFromLocalStorage) void synchroniseWithStorage();
-  }, [loadedFromLocalStorage]);
 
-  // listen to localstorage change on todo and update accordingly
-  useEffect(() => {
-    window.addEventListener("storage", (e) => {
-      if (e.key === "todos") {
-        void actions.loadLocallyStoredTodos();
-      }
-    });
-    return () => {
-      window.removeEventListener("storage", () => {});
-    };
-  }, [selectedTodoId]);
+    void synchroniseWithStorage();
+  }, []);
 
   return state.todoLists[0].todos.length > 0 ? (
     <ul className="overflow-auto h-full flex-grow">

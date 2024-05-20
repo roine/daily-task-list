@@ -30,9 +30,11 @@ export type TodoListState = {
 
 export type State = {
   todoLists: TodoListState[];
+  lastReset: Date | null;
 };
 
 export const initialState: State = {
+  lastReset: null,
   todoLists: [
     {
       id: uuidv4(),

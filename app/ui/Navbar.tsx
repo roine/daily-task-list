@@ -9,7 +9,7 @@ export default function Navbar() {
   const { offline } = useOffline();
 
   return (
-    <div className="navbar bg-base-100 max-w-4xl mx-auto px-0">
+    <div className="navbar bg-base-100 max-w-4xl mx-auto px-0 print:hidden">
       <div className="flex-1">
         <span
           title={offline ? "Offline" : "Online"}

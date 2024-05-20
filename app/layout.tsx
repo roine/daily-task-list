@@ -8,6 +8,7 @@ import { AppStateProvider } from "@/state/AppStateProvider";
 import classNames from "classnames";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { OfflineProvider } from "@/OfflineProvider";
+import { VisibilityProvider } from "@/VisibilityProvider";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -17,7 +18,7 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "Daily task list",
   description:
-    "A todo list that resets everyday. No accounts, no installations required.",
+    "A todo list that resets every cycle. No accounts, no installations required.",
 };
 
 export default async function RootLayout({
@@ -25,9 +26,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-
-
-
   return (
     <html lang="en">
       <body
@@ -39,11 +37,13 @@ export default async function RootLayout({
         <ThemeProvider>
           <Suspense fallback={<div>Loading...</div>}>
             <OfflineProvider>
-              <AuthProvider>
-                <AppStateProvider>
-                  <AppLayout>{children}</AppLayout>
-                </AppStateProvider>
-              </AuthProvider>
+              <VisibilityProvider>
+                <AuthProvider>
+                  <AppStateProvider>
+                    <AppLayout>{children}</AppLayout>
+                  </AppStateProvider>
+                </AuthProvider>
+              </VisibilityProvider>
             </OfflineProvider>
           </Suspense>
         </ThemeProvider>

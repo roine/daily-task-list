@@ -1,5 +1,5 @@
 "use client";
-import { TodolistTitle } from "@/ui/TodolistTile";
+import { TodolistTitle } from "@/ui/TodolistTitle";
 import Todolist from "@/ui/Todolist";
 import React, { useEffect } from "react";
 import { TodoCreate } from "@/ui/TodoCreate";
@@ -11,6 +11,7 @@ export default function Page() {
       window.history.replaceState({}, document.title, "/");
     }
   }, []);
+
   return (
     <>
       <TodolistTitle />

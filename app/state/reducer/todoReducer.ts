@@ -12,8 +12,8 @@ type AddTodoAction = {
   payload: { todo: Todo };
 };
 
-type ToggleTodoAction = {
-  type: "TOGGLE_COMPLETED_TODO";
+type ToggleCompleted = {
+  type: "TOGGLE_COMPLETED";
   payload: { id: Todo["id"] };
 };
 
@@ -32,19 +32,27 @@ type setListAction = {
   payload: { data: Pick<TodoListState, "id" | "todoTitle" | "position"> };
 };
 
+// takes a state and apply it to our app state
+type resetStateAction = {
+  type: "RESET_STATE";
+  payload: { state: State };
+};
+
 export type TodoAction =
   | AddTodosAction
   | AddTodoAction
-  | ToggleTodoAction
+  | ToggleCompleted
   | DeleteTodoAction
   | ChangeTodoTitleAction
-  | setListAction;
+  | setListAction
+  | resetStateAction;
 
 export const todoReducer = (state: State, action: TodoAction): State => {
   console.log(action);
   switch (action.type) {
     case "ADD_TODOS":
       return {
+        ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           todos: action.payload.todos,
@@ -53,14 +61,16 @@ export const todoReducer = (state: State, action: TodoAction): State => {
 
     case "ADD_TODO":
       return {
+        ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           todos: [...todoList.todos, action.payload.todo],
         })),
       };
 
-    case "TOGGLE_COMPLETED_TODO":
+    case "TOGGLE_COMPLETED":
       return {
+        ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           todos: todoList.todos.map((todo) =>
@@ -76,6 +86,7 @@ export const todoReducer = (state: State, action: TodoAction): State => {
 
     case "DELETE_TODO":
       return {
+        ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           todos: todoList.todos.filter((todo) => todo.id !== action.payload.id),
@@ -84,6 +95,7 @@ export const todoReducer = (state: State, action: TodoAction): State => {
 
     case "CHANGE_TODO_TITLE":
       return {
+        ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           todoTitle: action.payload.title,
@@ -92,6 +104,7 @@ export const todoReducer = (state: State, action: TodoAction): State => {
 
     case "SET_LIST":
       return {
+        ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           id: action.payload.data.id,
@@ -99,6 +112,9 @@ export const todoReducer = (state: State, action: TodoAction): State => {
           position: action.payload.data.position,
         })),
       };
+
+    case "RESET_STATE":
+      return action.payload.state;
   }
 };
 
@@ -106,41 +122,24 @@ export const getTodoActions = (
   dispatch: (action: TodoAction) => void,
   loggedIn: boolean,
 ) => ({
-  loadLocallyStoredTodos: async () => {
-    const { todoLists } = BrowserStorage.getTodos();
-    dispatch({ type: "ADD_TODOS", payload: { todos: todoLists[0].todos } });
-    dispatch({
-      type: "SET_LIST",
-      payload: {
-        data: {
-          id: todoLists[0].id,
-          todoTitle: todoLists[0].title,
-          position: todoLists[0].position,
-        },
-      },
-    });
+  resetState: (state: State) => {
+    dispatch({ type: "RESET_STATE", payload: { state } });
   },
 
   addTodo: (todo: Todo, listId: string) => {
     dispatch({ type: "ADD_TODO", payload: { todo } });
-    BrowserStorage.addTodo(todo);
     loggedIn && RemoteStorage.addTodo(todo, listId).then(console.log);
   },
 
-  toggleCompletedTodo: (id: Todo["id"]) => {
-    dispatch({ type: "TOGGLE_COMPLETED_TODO", payload: { id } });
-    BrowserStorage.toggleCompletedTodo(id);
+  toggleCompleted: (id: Todo["id"]) => {
+    dispatch({ type: "TOGGLE_COMPLETED", payload: { id } });
   },
 
-  deleteTodo: (
-    id: Todo["id"],
-  ): ReturnType<typeof BrowserStorage.deleteTodo> => {
+  deleteTodo: (id: Todo["id"]) => {
     dispatch({ type: "DELETE_TODO", payload: { id } });
-    return BrowserStorage.deleteTodo(id);
   },
 
   changeTodoTitle: (title: string) => {
     dispatch({ type: "CHANGE_TODO_TITLE", payload: { title } });
-    BrowserStorage.updateTodolistTitle(title);
   },
 });

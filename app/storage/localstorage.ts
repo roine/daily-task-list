@@ -1,13 +1,11 @@
-import { Todo } from "@/state/state";
+import { State, Todo, TodoListState } from "@/state/state";
 import { v4 as uuidv4 } from "uuid";
+import { useEffect, useRef } from "react";
 
 const todoStateKey = "todos";
 
-type TodoList = { todos: Todo[]; title: string; id: string; position: number };
+type DataStructure = State;
 
-type DataStructure = {
-  todoLists: TodoList[];
-};
 export namespace BrowserStorage {
   /**
    * Internal - get and update data in local storage.
@@ -38,65 +36,20 @@ export namespace BrowserStorage {
     return [parsedStored, updateData];
   };
 
-  export const addTodo = (todo: Todo): Todo => {
+  export const getState = (): DataStructure => {
     const [stored, updateData] = getData();
-    const todoLists: TodoList[] = stored?.todoLists ?? [];
-    const updatedTodos = [...todoLists[0].todos, todo];
-    updateData({
-      todoLists: todoLists.map((tl) => ({ ...tl, todos: updatedTodos })),
-    });
-    return todo;
-  };
-
-  export const deleteTodo = (todoId: Todo["id"]) => {
-    const [stored, updateData] = getData();
-    const todoLists: TodoList[] = stored?.todoLists ?? [];
-    const updatedTodos = todoLists[0].todos.filter(
-      (todo) => todo.id !== todoId,
-    );
-
-    updateData({
-      todoLists: todoLists.map((tl) => ({ ...tl, todos: updatedTodos })),
-    });
-  };
-
-  export const getTodos = (): DataStructure => {
-    const [stored, updateData] = getData();
-    const todoLists: TodoList[] =
+    const todoLists: TodoListState[] =
       stored?.todoLists ?? todoListForPresentation.todoLists;
     if (!stored?.todoLists) {
       updateData({ todoLists: todoLists });
     }
 
-    return { todoLists };
+    return { todoLists, lastReset: stored?.lastReset ?? null };
   };
 
-  export const toggleCompletedTodo = (id: Todo["id"]): Todo["id"] => {
-    const [stored, updateData] = getData();
-    const todoLists: TodoList[] = stored ? stored.todoLists : [];
-
-    const updatedTodos = todoLists[0].todos.map((t) =>
-      t.id === id
-        ? { ...t, completedDate: t.completedDate == null ? new Date() : null }
-        : t,
-    );
-
-    updateData({
-      todoLists: todoLists.map((tl) => ({ ...tl, todos: updatedTodos })),
-    });
-    return id;
-  };
-
-  export const updateTodolistTitle = <Tittle extends string>(
-    title: Tittle,
-  ): Tittle => {
-    const [stored, updateData] = getData();
-    const todoLists: TodoList[] = stored ? stored.todoLists : [];
-
-    updateData({
-      todoLists: todoLists.map((tl) => ({ ...tl, title })),
-    });
-    return title;
+  export const setState = (state: DataStructure): void => {
+    const [_, updateData] = getData();
+    updateData(state);
   };
 }
 
@@ -160,12 +113,37 @@ const todosForPresentation: Todo[] = [
 ];
 
 const todoListForPresentation: DataStructure = {
+  lastReset: null,
   todoLists: [
     {
-      title: "Untitled",
       id: uuidv4(),
+      frequencySelected: "Daily",
       position: 0,
+      todoTitle: "Untitled",
+      globalError: null,
       todos: todosForPresentation,
     },
   ],
+};
+
+// Add in-memory state in local store on change and vice-versa
+export const useLocalStorageSync = (
+  state: State,
+  { onStorageChange }: { onStorageChange: (state: State) => void },
+) => {
+  useEffect(() => {
+    BrowserStorage.setState(state);
+  }, [state]);
+
+  useEffect(() => {
+    window.addEventListener("storage", (e) => {
+      if (e.key === "todos") {
+        void onStorageChange(BrowserStorage.getState());
+      }
+    });
+
+    return () => {
+      window.removeEventListener("storage", () => {});
+    };
+  }, []);
 };

@@ -1,5 +1,6 @@
 import { frequency, State } from "@/state/state";
 import { findNextInArray, findPreviousInArray } from "@/helper/array";
+import { BrowserStorage } from "@/storage/localstorage";
 
 type NextFrequencyAction = {
   type: "SET_NEXT_FREQUENCY";
@@ -24,6 +25,7 @@ export const frequencyReducer = (
       );
       if (nextFrequency != null) {
         return {
+          ...state,
           todoLists: state.todoLists.map((todoList) => ({
             ...todoList,
             frequencySelected: nextFrequency,
@@ -41,6 +43,7 @@ export const frequencyReducer = (
       );
       if (prevFrequency != null) {
         return {
+          ...state,
           todoLists: state.todoLists.map((todoList) => ({
             ...todoList,
             frequencySelected: prevFrequency,
