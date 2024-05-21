@@ -10,6 +10,11 @@ export const frequency = [
 
 export type Frequency = (typeof frequency)[number];
 
+export type Tag = {
+  text: string;
+  color: string;
+};
+
 export type Todo = {
   id: string;
   text: string;
@@ -17,6 +22,7 @@ export type Todo = {
   frequency: Frequency;
   position: number;
   children: Todo[];
+  tags: string[];
 };
 
 export type TodoListState = {
@@ -26,6 +32,9 @@ export type TodoListState = {
   globalError: string | null;
   frequencySelected: Frequency;
   todos: Todo[];
+  tags: Record<string, { color: string }> | null;
+  // Used for tag filtering
+  filterBy: string | null;
 };
 
 export type State = {
@@ -37,12 +46,14 @@ export const initialState: State = {
   lastReset: null,
   todoLists: [
     {
+      tags: null,
       id: uuidv4(),
       frequencySelected: "Daily",
       position: 0,
       todoTitle: "",
       globalError: null,
       todos: [],
+      filterBy: null,
     },
   ],
 };

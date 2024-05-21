@@ -1,6 +1,7 @@
 import { State, Todo, TodoListState } from "@/state/state";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useRef } from "react";
+import { getColor } from "@/state/reducer/todoReducer";
 
 const todoStateKey = "todos";
 
@@ -56,59 +57,66 @@ export namespace BrowserStorage {
 const todosForPresentation: Todo[] = [
   {
     id: uuidv4(),
-    text: "Press `/` to focus the input",
+    text: "Press `/` to focus the input #tutorial",
     completedDate: null,
     frequency: "Daily",
     position: 0,
     children: [],
+    tags: ["#tutorial"],
   },
   {
     id: uuidv4(),
-    text: "Add a todo item with `Enter`",
+    text: "Add a todo item with `Enter` #tutorial",
     completedDate: null,
     frequency: "Daily",
     position: 1,
     children: [],
+    tags: ["#tutorial"],
   },
   {
     id: uuidv4(),
-    text: "Add another todo item with `Enter`",
+    text: "Add another todo item with `Enter` #tutorial",
     completedDate: null,
     frequency: "Daily",
     position: 2,
     children: [],
+    tags: ["#tutorial"],
   },
   {
     id: uuidv4(),
-    text: "Press `ESC` to unfocus (and access global shortcuts)",
+    text: "Press `ESC` to unfocus (and access global shortcuts) #tutorial",
     completedDate: null,
     frequency: "Daily",
     position: 3,
     children: [],
+    tags: ["#tutorial"],
   },
   {
     id: uuidv4(),
-    text: "Navigate the list with arrow up and down",
+    text: "Navigate the list with arrow up and down #tutorial",
     completedDate: null,
     frequency: "Daily",
     position: 4,
     children: [],
+    tags: ["#tutorial"],
   },
   {
     id: uuidv4(),
-    text: "Press `Enter` to complete a todo item",
+    text: "Press `Enter` to complete a todo item #tutorial",
     completedDate: new Date(),
     frequency: "Daily",
     position: 5,
     children: [],
+    tags: ["#tutorial"],
   },
   {
     id: uuidv4(),
-    text: "Create a new todo",
+    text: "Create a new todo #tutorial",
     completedDate: null,
     frequency: "Weekly",
     position: 6,
     children: [],
+    tags: ["#tutorial"],
   },
 ];
 
@@ -122,6 +130,8 @@ const todoListForPresentation: DataStructure = {
       todoTitle: "Untitled",
       globalError: null,
       todos: todosForPresentation,
+      tags: { "#tutorial": { color: getColor() } },
+      filterBy: null,
     },
   ],
 };

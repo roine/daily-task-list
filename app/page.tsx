@@ -3,6 +3,7 @@ import { TodolistTitle } from "@/ui/TodolistTitle";
 import Todolist from "@/ui/Todolist";
 import React, { useEffect } from "react";
 import { TodoCreate } from "@/ui/TodoCreate";
+import { TodoFilter } from "@/ui/TodoFilter";
 
 export default function Page() {
   useEffect(() => {
@@ -16,6 +17,7 @@ export default function Page() {
     <>
       <TodolistTitle />
       <TodoCreate />
+      <TodoFilter />
       <Todolist />
     </>
   );

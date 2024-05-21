@@ -132,3 +132,29 @@ const useResetTodoRoutines = (
     }
   }, [visible]);
 };
+
+export const useFilter = () => {
+  const [state, actions] = useAppState();
+
+  return {
+    setFilter: (filter: string) => {
+      actions.setFilter(filter);
+    },
+    clearFilter: () => {
+      actions.clearFilter();
+    },
+    getFilter: () => {
+      return state.todoLists[0].filterBy;
+    },
+    getFilteredTodos: () => {
+      const { filterBy } = state.todoLists[0];
+      if (filterBy === null) {
+        return state.todoLists[0].todos;
+      }
+
+      return state.todoLists[0].todos.filter((todo) => {
+        return todo.tags.includes(filterBy);
+      });
+    },
+  };
+};

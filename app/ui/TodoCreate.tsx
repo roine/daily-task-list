@@ -12,6 +12,8 @@ import { useFocusInputOnKey } from "@/hook/useFocusInputOnKey";
 import { frequency, Frequency } from "@/state/state";
 import classNames from "classnames";
 import { findNextInArray, findPreviousInArray } from "@/helper/array";
+import { getAllHashTagText } from "@/helper/string";
+import { InfoIcon } from "@/icons/InfoIcon";
 
 export const TodoCreate = () => {
   const inputEl = useRef<HTMLInputElement | null>(null);
@@ -27,17 +29,25 @@ export const TodoCreate = () => {
     }
     // add an item when press enter
     if (e.key === "Enter") {
+      const text = e.currentTarget.value;
+
+      // preprocess the text
+      const hashTags = getAllHashTagText(text);
+      actions.updateTagDictionary(hashTags);
+
       actions.addTodo(
         {
+          tags: hashTags,
           id: uuidv4(),
           position: 100,
-          text: e.currentTarget.value,
+          text,
           completedDate: null,
           frequency: state.todoLists[0].frequencySelected,
           children: [],
         },
         state.todoLists[0].id,
       );
+
       if (inputEl.current != null) {
         inputEl.current.value = "";
       }
@@ -65,7 +75,7 @@ export const TodoCreate = () => {
   };
 
   return (
-    <span className="print:hidden relative mb-3 lg:mb-12">
+    <span className="print:hidden relative">
       <input
         onKeyDown={handleInputKeydown}
         ref={inputEl}
@@ -157,7 +167,6 @@ const FrequencyButton = ({
       <span
         key="current-frequency"
         className={classNames(
-          "cursor-pointer",
           frequencySelected === "Daily" && "text-emerald-400",
           frequencySelected === "Weekly" && "text-red-400",
           frequencySelected === "Monthly" && "text-amber-400",
@@ -173,11 +182,13 @@ const FrequencyButton = ({
         )}
       >
         <div className="flex items-center gap-2">
-          <button onClick={handleClickFrequency}>{frequencySelected}</button>
+          <button onClick={handleClickFrequency} aria-label="Frequency">
+            {frequencySelected}
+          </button>
 
           <button
             className="text-xs"
-            aria-label="info"
+            aria-label="Info"
             onClick={handleFrequencyInfoActive}
           >
             <InfoIcon />
@@ -205,25 +216,5 @@ const FrequencyButton = ({
         </div>
       </span>
     </span>
-  );
-};
-
-// a component of an icon representing an info icon
-const InfoIcon = () => {
-  return (
-    // an invisible button to represent an info icon
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      className="stroke-current shrink-0 w-6 h-6"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      ></path>
-    </svg>
   );
 };

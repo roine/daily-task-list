@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "jest",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx}\"",
+    "serve:prod": "pnpm run build && serve out"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.7",

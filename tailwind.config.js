@@ -11,6 +11,8 @@ module.exports = {
       },
     },
   },
+  // used for dynamic colors
+  safelist: [{ pattern: /from-./ }, { pattern: /to-./ }],
   plugins: [require("@tailwindcss/typography"), require("daisyui")],
   daisyui: {
     themes: [

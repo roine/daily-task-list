@@ -1,5 +1,5 @@
 "use client";
-import { useAppState } from "../state/AppStateProvider";
+import { useAppState, useFilter } from "../state/AppStateProvider";
 import { TodoItem } from "@/ui/TodoItem";
 import { useEffect, useState } from "react";
 import { useListNavigation } from "@/hook/useListNavigation";
@@ -9,6 +9,7 @@ import { useAuth } from "@/auth/AuthProvider";
 export default function Todolist() {
   const [state, actions] = useAppState();
   const { loggedIn } = useAuth();
+  const { getFilteredTodos } = useFilter();
   const handlePressEnter = (selectedTodoId: string) => {
     actions.toggleCompleted(selectedTodoId);
   };
@@ -45,9 +46,10 @@ export default function Todolist() {
 
   return state.todoLists[0].todos.length > 0 ? (
     <ul className="overflow-auto h-full flex-grow">
-      {state.todoLists[0].todos.map((todo) => (
+      {getFilteredTodos().map((todo) => (
         <TodoItem
           key={todo.id}
+          tagProps={state.todoLists[0].tags}
           {...actions}
           {...todo}
           selected={todo.id === selectedTodoId}

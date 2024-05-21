@@ -4,28 +4,32 @@ import classNames from "classnames";
 import { isTouchScreen } from "@/helper/device";
 import SwipeableViews from "react-swipeable-views";
 import React, { useState } from "react";
+import { useFilter } from "@/state/AppStateProvider";
+import { TrashCanIcon } from "@/icons/TrashCan";
 
 type TodoItemProps = {
   selected: boolean;
+  tagProps: Record<string, { color: string }> | null;
 } & Todo &
   ReturnType<typeof getTodoActions>;
 
 export const TodoItem = (todo: TodoItemProps) => {
   const isCompleted = todo.completedDate != null;
   let [distance, setDistance] = useState(0);
+  const { setFilter, getFilter } = useFilter();
 
   return (
     <li
       className={classNames(
-        "list-none relative text",
+        "list-none relative text border-l-2 border-solid",
         {
-          "border-l-2 border-accent border-solid shadow-inner print:shadow-none print:border-none":
+          "border-accent shadow-inner print:shadow-none print:border-transparent":
             todo.selected && !isTouchScreen(),
         },
         { "active:bg-accent/5": isTouchScreen() && distance < 0.2 },
         { "bg-red-600 text-black": isTouchScreen() && distance >= 0.2 },
         {
-          "border-l-2 border-transparent border-solid": !todo.selected,
+          "border-transparent": !todo.selected,
         },
       )}
     >
@@ -50,8 +54,33 @@ export const TodoItem = (todo: TodoItemProps) => {
             checked={isCompleted}
             onChange={() => todo.toggleCompleted(todo.id)}
           />
-          <label className="cursor-pointer flex-grow">
-            <span className="text-base">{todo.text}</span>
+          <label className="flex-grow">
+            <span className="text-base">
+              {todo.text.split(" ").map((part, index) => {
+                // Check if the part starts with #
+                if (part.startsWith("#")) {
+                  const tagColor = todo.tagProps?.[part]?.color;
+                  return (
+                    <button
+                      aria-label={`Filter by ${part}`}
+                      onClick={() => setFilter(part)}
+                      disabled={getFilter() === part}
+                      key={index}
+                      className={classNames(
+                        `bg-gradient-to-br from-${tagColor}-300 to-${tagColor}-500 inline-block text-transparent bg-clip-text px-1 font-semibold mx-1.5 text-xs`,
+                      )}
+                    >
+                      {part}
+                    </button>
+                  );
+                }
+                return (
+                  <span key={index} className="mx-0.5">
+                    {part}
+                  </span>
+                );
+              })}
+            </span>
           </label>
           <span className="text-sm print:hidden block">{todo.frequency}</span>
         </span>
@@ -64,27 +93,8 @@ export const TodoItem = (todo: TodoItemProps) => {
           opacity: distance < 0.2 ? distance : 1,
         }}
       >
-        <TrashCan />
+        <TrashCanIcon />
       </div>
     </li>
-  );
-};
-
-/*a trash can with a lid svg icon with only the outlines and being dark red as a component*/
-const TrashCan = () => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 6l2-2h14l2 2M6 6V21a2 2 0 002 2h8a2 2 0 002-2V6M10 11v6M14 11v6"></path>
-    </svg>
   );
 };
