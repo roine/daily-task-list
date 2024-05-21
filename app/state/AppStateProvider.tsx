@@ -1,14 +1,13 @@
 "use client";
 import React, { useEffect, useMemo, useReducer } from "react";
-import { initialState, State, TodoListState } from "@/state/state";
-import { Action, Actions, getActions, reducer } from "@/state/reducer";
+import { State, TodoListState } from "@/state/state";
+import { Actions, getActions, reducer } from "@/state/reducer";
 import { useAuth } from "@/auth/AuthProvider";
 import {
   isBeforeThisMonth,
   isBeforeThisWeek,
   isBeforeThisYear,
   isBeforeToday,
-  isToday,
 } from "@/helper/date";
 import { BrowserStorage, useLocalStorageSync } from "@/storage/localstorage";
 import { useVisibility } from "@/VisibilityProvider";

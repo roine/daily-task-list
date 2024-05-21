@@ -6,6 +6,7 @@ import SwipeableViews from "react-swipeable-views";
 import React, { useState } from "react";
 import { useFilter } from "@/state/AppStateProvider";
 import { TrashCanIcon } from "@/icons/TrashCan";
+import { hashRegexp } from "@/helper/string";
 
 type TodoItemProps = {
   selected: boolean;
@@ -21,7 +22,8 @@ export const TodoItem = (todo: TodoItemProps) => {
   return (
     <div
       className={classNames(
-        "list-none relative text border-l-2 border-solid",
+        "relative text border-l-2 border-solid",
+        { "border-transparent": isTouchScreen() },
         {
           "border-accent shadow-inner print:shadow-none print:border-transparent":
             todo.selected && !isTouchScreen(),
@@ -46,7 +48,7 @@ export const TodoItem = (todo: TodoItemProps) => {
           }
         }}
       >
-        <span className="flex gap-3 align-items-center py-4 lg:py-3 px-3 print:py-1 print:px-0 print:text-black">
+        <span className="flex gap-3 align-items-center py-2 print:py-1 lg:py-3 px-0 lg:px-2 print:px-0 print:text-black">
           <input
             tabIndex={-1}
             type="checkbox"
@@ -54,34 +56,32 @@ export const TodoItem = (todo: TodoItemProps) => {
             checked={isCompleted}
             onChange={() => todo.toggleCompleted(todo.id)}
           />
-          <label className="flex-grow">
-            <span className="text-base">
-              {todo.text.split(" ").map((part, index) => {
-                // Check if the part starts with #
-                if (part.startsWith("#")) {
-                  const tagColor = todo.tagProps?.[part]?.color;
-                  return (
-                    <button
-                      aria-label={`Filter by ${part}`}
-                      onClick={() => setFilter(part)}
-                      disabled={getFilter() === part}
-                      key={index}
-                      className={classNames(
-                        `bg-gradient-to-br from-${tagColor}-300 to-${tagColor}-500 inline-block text-transparent bg-clip-text px-1 font-semibold mx-1.5 text-xs`,
-                      )}
-                    >
-                      {part}
-                    </button>
-                  );
-                }
+          <span className="text-base flex-grow">
+            {todo.text.split(hashRegexp).map((part, index) => {
+              // Check if the part starts with #
+              if (part.startsWith("#")) {
+                const tagColor = todo.tagProps?.[part]?.color;
                 return (
-                  <span key={index} className="mx-0.5">
+                  <button
+                    aria-label={`Filter by ${part}`}
+                    onClick={() => setFilter(part)}
+                    disabled={getFilter() === part}
+                    key={index}
+                    className={classNames(
+                      `bg-gradient-to-br from-${tagColor}-300 to-${tagColor}-500 inline-block text-transparent bg-clip-text px-1 font-semibold mx-0.5 text-xs`,
+                    )}
+                  >
                     {part}
-                  </span>
+                  </button>
                 );
-              })}
-            </span>
-          </label>
+              }
+              return (
+                <span key={index} className="mx-0.5">
+                  {part}
+                </span>
+              );
+            })}
+          </span>
           <span className="text-sm print:hidden block">{todo.frequency}</span>
         </span>
       </SwipeableViews>

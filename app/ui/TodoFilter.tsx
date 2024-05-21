@@ -12,9 +12,12 @@ export const TodoFilter = () => {
 
   return (
     <div
-      className={classNames("py-4 print:hidden flex items-center gap-1", {
-        invisible: !filter,
-      })}
+      className={classNames(
+        "py-3 lg:py-4 print:hidden flex items-center gap-1",
+        {
+          invisible: !filter,
+        },
+      )}
     >
       <span
         className={classNames("text-sm text-base-content/75 font-semibold", {

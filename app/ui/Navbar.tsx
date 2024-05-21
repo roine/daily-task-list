@@ -10,7 +10,7 @@ export default function Navbar() {
   const { offline } = useOffline();
 
   return (
-    <div className="bg-base-100 print:hidden drop-shadow-sm">
+    <div className="bg-base-100 hidden lg:block print:hidden drop-shadow-sm">
       <div className="navbar max-w-4xl mx-auto px-0 py-0">
         <div className="flex-1">
           <span
