@@ -12,6 +12,7 @@ import {
 } from "@/helper/date";
 import { BrowserStorage, useLocalStorageSync } from "@/storage/localstorage";
 import { useVisibility } from "@/VisibilityProvider";
+import { noop } from "@/helper/function";
 
 /**
  * The application state is kept in sync with the localstorage.
@@ -133,8 +134,21 @@ const useResetTodoRoutines = (
   }, [visible]);
 };
 
-export const useFilter = () => {
+export const useFilter = (
+  {
+    onFilterChange,
+  }:
+    | {
+        onFilterChange: (filter: string | null) => void;
+      }
+    | undefined = { onFilterChange: noop },
+) => {
   const [state, actions] = useAppState();
+
+  // Notify parent that the filter changed
+  useEffect(() => {
+    onFilterChange(state.todoLists[0].filterBy);
+  }, [state.todoLists[0].filterBy]);
 
   return {
     setFilter: (filter: string) => {

@@ -19,7 +19,7 @@ export const TodoItem = (todo: TodoItemProps) => {
   const { setFilter, getFilter } = useFilter();
 
   return (
-    <li
+    <div
       className={classNames(
         "list-none relative text border-l-2 border-solid",
         {
@@ -95,6 +95,6 @@ export const TodoItem = (todo: TodoItemProps) => {
       >
         <TrashCanIcon />
       </div>
-    </li>
+    </div>
   );
 };

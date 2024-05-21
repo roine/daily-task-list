@@ -16,9 +16,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   useThemeSwitcherShortcut();
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="relative mx-auto max-w-4xl pt-0 pb-6 px-2 lg:px-0 flex flex-col">
+      <main className="relative mx-auto max-w-4xl w-full pt-0 pb-6 px-3 lg:px-0 flex flex-col grow">
         {state.todoLists[0]?.globalError != null && (
           <Alert className="mb-4" variant="error">
             {state.todoLists[0].globalError}

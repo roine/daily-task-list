@@ -29,7 +29,7 @@ export const useListNavigation = <T extends { id: string }[]>(
     if (list.length !== 0 && selectedTodoId == null) {
       setSelectedTodoId(list[0].id);
     }
-  }, [list]);
+  }, [list, selectedTodoId]);
 
   const handleListHotkeys = (e: KeyboardEvent) => {
     // keys with modifier are to be handled elsewhere
@@ -88,5 +88,5 @@ export const useListNavigation = <T extends { id: string }[]>(
     }
   };
 
-  return { selectedTodoId };
+  return { selectedTodoId, setSelectedTodoId };
 };
