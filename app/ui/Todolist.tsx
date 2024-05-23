@@ -1,36 +1,43 @@
 "use client";
 import { useAppState, useFilter } from "../state/AppStateProvider";
 import { TodoItem } from "@/ui/TodoItem";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useListNavigation } from "@/hook/useListNavigation";
 import { useAuth } from "@/auth/AuthProvider";
 import { Flipper, Flipped, spring } from "react-flip-toolkit";
 import { Todo } from "@/state/state";
 
 export default function Todolist() {
+  const [editModeTodos, setEditModeTodos] = useState<Todo["id"][]>([]);
+
   const [state, actions] = useAppState();
   const { loggedIn } = useAuth();
   const { getFilteredTodos } = useFilter({
     onFilterChange: () => {
-      setSelectedTodoId(null);
+      setSelectedItemId(filteredTodos[0].id);
     },
   });
 
   const filteredTodos = getFilteredTodos();
 
-  const handlePressEnter = (selectedTodoId: string) => {
-    actions.toggleCompleted(selectedTodoId);
-  };
+  const turnOffEditMode = (selectedTodoId: string) =>
+    setEditModeTodos(editModeTodos.filter((id) => id !== selectedTodoId));
 
-  const handlePressBackspace = (selectedTodoId: string) => {
-    actions.deleteTodo(selectedTodoId);
-  };
+  const turnOnEditMode = (selectedTodoId: string) =>
+    setEditModeTodos([...editModeTodos, selectedTodoId]);
 
-  const { selectedTodoId, setSelectedTodoId } = useListNavigation(
+  const { selectedItemId, setSelectedItemId } = useListNavigation(
     filteredTodos,
     {
-      onPressEnter: handlePressEnter,
-      onPressBackspace: handlePressBackspace,
+      onPressEnter: actions.toggleCompleted,
+      onPressBackspace: actions.deleteTodo,
+      onPressEsc: turnOffEditMode,
+      customs: [
+        {
+          on: "e",
+          handler: turnOnEditMode,
+        },
+      ],
     },
   );
 
@@ -55,17 +62,29 @@ export default function Todolist() {
     void synchroniseWithStorage();
   }, []);
 
+  const requestEditModeFor = (todoId: string) => (editMode: boolean) => {
+    if (editMode) {
+      turnOnEditMode(todoId);
+    } else {
+      turnOffEditMode(todoId);
+    }
+  };
+
   return state.todoLists[0].todos.length > 0 ? (
     <AnimatedTodoTransition todos={filteredTodos}>
-      {(todo) => (
-        <TodoItem
-          key={todo.id}
-          tagProps={state.todoLists[0].tags}
-          {...actions}
-          {...todo}
-          selected={todo.id === selectedTodoId}
-        />
-      )}
+      {(todo) => {
+        return (
+          <TodoItem
+            key={todo.id}
+            tagProps={state.todoLists[0].tags}
+            {...actions}
+            {...todo}
+            selected={todo.id === selectedItemId}
+            editMode={editModeTodos.includes(todo.id)}
+            requestEditMode={requestEditModeFor(todo.id)}
+          />
+        );
+      }}
     </AnimatedTodoTransition>
   ) : (
     <p>Congratulations, you can rest now.</p>

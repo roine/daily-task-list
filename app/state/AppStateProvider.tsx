@@ -1,6 +1,12 @@
 "use client";
-import React, { useEffect, useMemo, useReducer } from "react";
-import { State, TodoListState } from "@/state/state";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from "react";
+import { State, Todo, TodoListState } from "@/state/state";
 import { Actions, getActions, reducer } from "@/state/reducer";
 import { useAuth } from "@/auth/AuthProvider";
 import {
@@ -78,44 +84,86 @@ export const resetTodos = (state: State): State => {
     return state;
   }
 
-  const newTodoLists: TodoListState[] = state.todoLists.map((todoListState) => {
-    const newTodos = todoListState.todos.map((todo) => {
-      if (todo.completedDate == null) {
+  const resetTodoCompleteness = (state: State): State => ({
+    todoLists: state.todoLists.map((todoListState) => {
+      const newTodos = todoListState.todos.map((todo) => {
+        if (todo.completedDate == null) {
+          return todo;
+        }
+
+        if (todo.frequency === "Daily" && isBeforeToday(todo.completedDate)) {
+          return { ...todo, completedDate: null };
+        }
+
+        if (
+          todo.frequency === "Weekly" &&
+          isBeforeThisWeek(todo.completedDate)
+        ) {
+          return { ...todo, completedDate: null };
+        }
+
+        if (
+          todo.frequency === "Monthly" &&
+          isBeforeThisMonth(todo.completedDate)
+        ) {
+          return { ...todo, completedDate: null };
+        }
+
+        if (
+          todo.frequency === "Yearly" &&
+          isBeforeThisYear(todo.completedDate)
+        ) {
+          return { ...todo, completedDate: null };
+        }
+
+        if (todo.frequency === "Once" && isBeforeToday(todo.completedDate)) {
+          return { ...todo, completedDate: null };
+        }
+
         return todo;
-      }
+      });
 
-      if (todo.frequency === "Daily" && isBeforeToday(todo.completedDate)) {
-        return { ...todo, completedDate: null };
-      }
-
-      if (todo.frequency === "Weekly" && isBeforeThisWeek(todo.completedDate)) {
-        return { ...todo, completedDate: null };
-      }
-
-      if (
-        todo.frequency === "Monthly" &&
-        isBeforeThisMonth(todo.completedDate)
-      ) {
-        return { ...todo, completedDate: null };
-      }
-
-      if (todo.frequency === "Yearly" && isBeforeThisYear(todo.completedDate)) {
-        return { ...todo, completedDate: null };
-      }
-
-      if (todo.frequency === "Once" && isBeforeToday(todo.completedDate)) {
-        return { ...todo, completedDate: null };
-      }
-
-      return todo;
-    });
-
-    return { ...todoListState, todos: newTodos };
+      return { ...todoListState, todos: newTodos };
+    }),
+    lastReset: new Date(),
   });
 
-  return { todoLists: newTodoLists, lastReset: new Date() };
+  const cleanupUnusedTags = (state: State): State => {
+    // list all used tags
+    const usedTags = new Set<string>();
+    state.todoLists[0].todos.forEach((todo) => {
+      todo.tags.forEach((tag) => usedTags.add(tag));
+    });
+
+    return {
+      lastReset: new Date(),
+      todoLists: state.todoLists.map((todoList) => {
+        // go through our tag dict and remove the unused ones
+        const todoListTagDict = todoList.tags;
+
+        if (todoListTagDict == null) {
+          return todoList;
+        }
+
+        return {
+          ...todoList,
+          tags: Object.keys(todoListTagDict).reduce((acc, tag) => {
+            if (usedTags.has(tag)) {
+              return { ...acc, [tag]: todoListTagDict[tag] };
+            }
+            return acc;
+          }, {}),
+        };
+      }),
+    };
+  };
+
+  return cleanupUnusedTags(resetTodoCompleteness(state));
 };
 
+/**
+ * Reset todo at the beginning of the day
+ */
 const useResetTodoRoutines = (
   state: State,
   { onNeedStateChange }: { onNeedStateChange: (state: State) => void },
@@ -138,18 +186,26 @@ export const useFilter = (
     onFilterChange,
   }:
     | {
-        onFilterChange: (filter: string | null) => void;
+        onFilterChange: (filter: string | null, filteredTodos: Todo[]) => void;
       }
     | undefined = { onFilterChange: noop },
 ) => {
   const [state, actions] = useAppState();
 
-  // Notify parent that the filter changed
+  const oldFilter = useRef(state.todoLists[0].filterBy);
+
+  // Notify parent that the filter changed, make sure to run only on filter change
   useEffect(() => {
-    onFilterChange(state.todoLists[0].filterBy);
+    if (oldFilter.current !== state.todoLists[0].filterBy) {
+      onFilterChange(
+        state.todoLists[0].filterBy,
+        hookValues.getFilteredTodos(),
+      );
+      oldFilter.current = state.todoLists[0].filterBy;
+    }
   }, [state.todoLists[0].filterBy]);
 
-  return {
+  const hookValues = {
     setFilter: (filter: string) => {
       actions.setFilter(filter);
     },
@@ -170,4 +226,6 @@ export const useFilter = (
       });
     },
   };
+
+  return hookValues;
 };

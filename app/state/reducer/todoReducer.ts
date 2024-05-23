@@ -13,6 +13,11 @@ type AddTodoAction = {
   payload: { todo: Todo };
 };
 
+type EditTodoAction = {
+  type: "EDIT_TODO_TEXT";
+  payload: { todo: Todo };
+};
+
 type ToggleCompleted = {
   type: "TOGGLE_COMPLETED";
   payload: { id: Todo["id"] };
@@ -52,6 +57,7 @@ type resetStateAction = {
 export type TodoAction =
   | AddTodosAction
   | AddTodoAction
+  | EditTodoAction
   | ToggleCompleted
   | DeleteTodoAction
   | ChangeTodoTitleAction
@@ -78,6 +84,16 @@ export const todoReducer = (state: State, action: TodoAction): State => {
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           todos: [...todoList.todos, action.payload.todo],
+        })),
+      };
+    case "EDIT_TODO_TEXT":
+      return {
+        ...state,
+        todoLists: state.todoLists.map((todoList) => ({
+          ...todoList,
+          todos: todoList.todos.map((todo) =>
+            todo.id === action.payload.todo.id ? action.payload.todo : todo,
+          ),
         })),
       };
 
@@ -183,6 +199,10 @@ export const getTodoActions = (
   addTodo: (todo: Todo, listId: string) => {
     dispatch({ type: "ADD_TODO", payload: { todo } });
     loggedIn && RemoteStorage.addTodo(todo, listId).then(console.log);
+  },
+
+  editTodo: (todo: Todo) => {
+    dispatch({ type: "EDIT_TODO_TEXT", payload: { todo } });
   },
 
   toggleCompleted: (id: Todo["id"]) => {
