@@ -9,7 +9,7 @@ export const TodolistTitle = ({}: TodoListTitleProps) => {
   return (
     <h1
       contentEditable={true}
-      className="text-5xl lg:text-6xl  tracking-tight outline-none my-7 print:mb-6 print:text-black print:font-extrabold"
+      className="my-7 px-3 text-5xl tracking-tight  outline-none lg:px-0 lg:text-6xl print:mb-6 print:font-extrabold print:text-black"
       defaultValue={state.todoLists[0].todoTitle}
       onBlur={(e) => actions.changeTodoTitle(e.currentTarget.innerText)}
       suppressContentEditableWarning={true}

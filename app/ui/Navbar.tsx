@@ -10,8 +10,8 @@ export default function Navbar() {
   const { offline } = useOffline();
 
   return (
-    <div className="bg-base-100 hidden lg:block print:hidden drop-shadow-sm">
-      <div className="navbar max-w-4xl mx-auto px-0 py-0">
+    <div className="hidden bg-base-100 drop-shadow-sm lg:block print:hidden">
+      <div className="navbar mx-auto max-w-4xl px-0 py-0">
         <div className="flex-1">
           <span
             title={offline ? "Offline" : "Online"}
@@ -22,17 +22,17 @@ export default function Navbar() {
           />
           <div className="navbar-start">
             {process.env.NEXT_PUBLIC_AUTH_SERVER_URL && (
-              <div className="dropdown -ml-1 drop">
+              <div className="drop dropdown -ml-1">
                 <div
                   tabIndex={0}
                   role="button"
-                  className="btn btn-ghost btn-circle"
+                  className="btn btn-circle btn-ghost"
                 >
                   <HamburgerIcon />
                 </div>
                 <ul
                   tabIndex={0}
-                  className="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+                  className="menu dropdown-content menu-sm z-[1] mt-2 w-52 rounded-box bg-base-100 p-2 shadow"
                 >
                   {loggedIn && !offline && (
                     <li>
@@ -50,7 +50,7 @@ export default function Navbar() {
                   )}
                   {offline && (
                     //   tailwind css class to make it look like a message
-                    <li className="text-xs italic text-base-content/50 p-2">
+                    <li className="p-2 text-xs italic text-base-content/50">
                       You are offline. Your changes will be synchronised as soon
                       as you connect to the internet.
                     </li>
@@ -63,7 +63,7 @@ export default function Navbar() {
         <div className="flex-none">
           <ul className="menu menu-horizontal px-0">
             <li>
-              <ThemeSwitcher className="px-0 hidden lg:block" />
+              <ThemeSwitcher className="hidden px-0 lg:block" />
             </li>
           </ul>
         </div>

@@ -98,6 +98,8 @@ const AnimatedTodoTransition = ({
   todos: Todo[];
   children: (todo: Todo) => ReactNode;
 }) => {
+  const [state] = useAppState();
+
   const onAppear = (el: HTMLElement, index: number) => {
     spring({
       onUpdate: (val) => {
@@ -114,11 +116,11 @@ const AnimatedTodoTransition = ({
     removeElement: () => void,
   ) => {
     spring({
-      config: { overshootClamping: true },
       onUpdate: (val) => {
         // @ts-ignore
         el.style.opacity = 1 - val;
       },
+      // invert delay to make the exit animation overlap with the enter animation
       onComplete: removeElement,
     });
 
@@ -130,12 +132,13 @@ const AnimatedTodoTransition = ({
 
   return (
     <Flipper
-      flipKey={todos.map((item) => item.id).join("")}
-      className="staggered-list-content flex-grow"
+      flipKey={todos.length}
+      decisionData={{ todoListSize: state.todoLists[0].todos.length }}
+      className="flex-grow"
       spring="noWobble"
     >
       <div>
-        {todos.map((todo) => (
+        {todos.map((todo, index) => (
           <Flipped
             key={todo.id}
             flipId={todo.id}

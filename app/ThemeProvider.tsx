@@ -173,7 +173,7 @@ export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
         <input
           type="checkbox"
           id="my-toggle"
-          className="toggle theme-controller toggle-xs"
+          className="theme-controller toggle toggle-xs"
           onChange={(e) => changeTheme(e.target.checked ? "dark" : "light")}
           checked={darkThemes.includes(theme)}
         />

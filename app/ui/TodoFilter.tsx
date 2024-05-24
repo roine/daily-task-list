@@ -13,14 +13,14 @@ export const TodoFilter = () => {
   return (
     <div
       className={classNames(
-        "py-3 lg:py-4 print:hidden flex items-center gap-1",
+        "flex items-center gap-1 px-3 py-3 lg:py-4 print:hidden",
         {
           invisible: !filter,
         },
       )}
     >
       <span
-        className={classNames("text-sm text-base-content/75 font-semibold", {
+        className={classNames("text-sm font-semibold text-base-content/75", {
           invisible: !filter,
         })}
       >
@@ -33,7 +33,7 @@ export const TodoFilter = () => {
       >
         <CloseIcon />
         <span
-          className={`bg-gradient-to-br from-${tagColor}-300 to-${tagColor}-500 text-transparent bg-clip-text px-1 font-semibold text-xs`}
+          className={`bg-gradient-to-br from-${tagColor}-300 to-${tagColor}-500 bg-clip-text px-1 text-xs font-semibold text-transparent`}
         >
           {filter}
         </span>

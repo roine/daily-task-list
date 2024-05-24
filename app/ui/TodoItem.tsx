@@ -2,14 +2,21 @@ import { Frequency, frequency, Todo } from "../state/state";
 import { getTodoActions } from "@/state/reducer/todoReducer";
 import classNames from "classnames";
 import { isTouchScreen } from "@/helper/device";
-import SwipeableViews from "react-swipeable-views";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useFilter } from "@/state/AppStateProvider";
 import { TrashCanIcon } from "@/icons/TrashCan";
-import { getAllHashTagText, hashRegexp } from "@/helper/string";
+import {
+  getAllHashTagText,
+  getAllLinkText,
+  hashRegexp,
+  urlRegex,
+} from "@/helper/string";
 import { PencilIcon } from "@/icons/Pencil";
 import { CheckIcon } from "@/icons/Check";
 import { CloseIcon } from "@/icons/Close";
+import { SelfPositioningTooltip } from "@/ui/SelfPositioningTooltip";
+import { getMetaSymbolForOS } from "@/helper/window";
+import { useOnTap } from "@/hook/useTap";
 
 type TodoItemProps = {
   editMode: boolean;
@@ -63,55 +70,90 @@ const TodoItemEditMode = ({
         setReadMode();
       }}
       className={classNames(
-        "flex gap-3 px-2 py-3 items-center shadow-inner border-l-2 border-solid",
+        "flex flex-col items-stretch gap-3 border-l-0 border-solid px-2 py-3 shadow-inner lg:flex-row lg:border-l-2",
         { "border-transparent": isTouchScreen() || !todo.selected },
         {
-          "border-accent shadow-inner print:shadow-none print:border-transparent":
+          "border-accent shadow-inner print:border-transparent print:shadow-none":
             todo.selected && !isTouchScreen(),
         },
       )}
     >
-      <input
-        aria-label="Edit task text."
-        type="text"
-        defaultValue={todo.text}
-        className={classNames(
-          "input input-bordered input-sm flex items-center flex-grow",
-        )}
-        autoFocus
-        onChange={(e) => setNewText(e.target.value)}
-      />
-      <select
-        className="select select-bordered select-sm"
-        aria-label="Select repeat frequency for task."
-        defaultValue={todo.frequency}
-        onChange={(e) => setNewFrequency(e.target.value as Frequency)}
-      >
-        <option disabled>Frequency</option>
-        {frequency.map((f) => (
-          <option key={f} value={f}>
-            {f}
-          </option>
-        ))}
-      </select>
-      <div className="lg:tooltip" data-tip="Cancel task changes">
+      <div className="flex flex-grow gap-3">
+        <input
+          aria-label="Edit task text."
+          type="text"
+          defaultValue={todo.text}
+          className={classNames(
+            "input input-sm input-bordered flex flex-grow items-center lg:input-md",
+          )}
+          autoFocus
+          onChange={(e) => setNewText(e.target.value)}
+        />
+        <select
+          className="select select-bordered select-sm lg:select-md"
+          aria-label="Select repeat frequency for task."
+          defaultValue={todo.frequency}
+          onChange={(e) => setNewFrequency(e.target.value as Frequency)}
+        >
+          <option disabled>Frequency</option>
+          {frequency.map((f) => (
+            <option key={f} value={f}>
+              {f}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex gap-3 lg:hidden">
+        <span className="grow">
+          <button
+            type="button"
+            className="btn btn-outline btn-error btn-sm"
+            aria-label="Delete task"
+            onClick={() => todo.deleteTodo(todo.id)}
+          >
+            <TrashCanIcon className="h-4 w-4" strokeWidth="2" />
+            Delete
+          </button>
+        </span>
         <button
           type="button"
+          className="btn btn-outline btn-sm"
           onClick={() => setReadMode()}
-          className="btn btn-sm btn-outline btn-circle"
           aria-label="Cancel task changes"
         >
           <CloseIcon className="h-4 w-4" strokeWidth="2" />
+          Cancel
         </button>
-      </div>
-      <div className="lg:tooltip" data-tip="Save task changes">
         <button
-          type="submit"
-          className="btn btn-sm btn-outline btn-circle"
+          className="btn btn-outline btn-sm"
           aria-label="Save task changes"
         >
           <CheckIcon className="h-4 w-4" strokeWidth="2" />
+          Save
         </button>
+      </div>
+
+      <div className="hidden gap-3 lg:flex">
+        <SelfPositioningTooltip data-tip="Cancel task changes">
+          <button
+            type="button"
+            onClick={() => setReadMode()}
+            className="btn btn-circle btn-outline btn-sm"
+            aria-label="Cancel task changes"
+          >
+            <CloseIcon className="h-4 w-4" strokeWidth="2" />
+          </button>
+        </SelfPositioningTooltip>
+        <SelfPositioningTooltip data-tip="Save task changes">
+          <button
+            type="submit"
+            className="btn btn-circle btn-outline btn-sm"
+            aria-label="Save task changes"
+          >
+            <CheckIcon className="h-4 w-4" strokeWidth="2" />
+          </button>
+        </SelfPositioningTooltip>
       </div>
     </form>
   );
@@ -125,113 +167,145 @@ const TodoItemReadMode = ({
   setEditMode: () => void;
 }) => {
   const isCompleted = todo.completedDate != null;
-  let [distance, setDistance] = useState(0);
   const { setFilter, getFilter } = useFilter();
+  const dragDistance = useRef<[number, number] | null>(null);
+  const tapProps = useOnTap({
+    onTap: () => {
+      setEditMode();
+    },
+  });
+
+  const textParts = todo.text
+    .split(" ")
+    .map((part) => {
+      if (getAllLinkText(part).length > 0) {
+        return { value: part, type: "url" as const };
+      }
+      if (getAllHashTagText(part).length > 0) {
+        return { value: part, type: "hash" as const };
+      }
+      return { value: part, type: "plain" as const };
+    })
+    // merge plain parts to improve rendering performance and visual
+    .reduce<{ value: string; type: "url" | "hash" | "plain" }[]>(
+      (acc, part) => {
+        const prevEntry = acc[acc.length - 1];
+        if (part.type === "plain" && prevEntry && prevEntry.type === "plain") {
+          return [
+            ...acc.slice(0, acc.length - 1),
+            {
+              type: "plain",
+              value: [prevEntry.value, part.value].join(" "),
+            },
+          ];
+        }
+        return [...acc, part];
+      },
+      [],
+    );
 
   return (
     <div
+      {...tapProps}
       className={classNames(
-        "relative text border-l-2 border-solid group",
+        "text group relative hover:z-10 ",
+        "px-2",
+        "border-l-0 border-solid lg:border-l-2",
         "hover:shadow-inner",
         { "border-transparent": isTouchScreen() || !todo.selected },
         {
-          "border-accent shadow-inner print:shadow-none print:border-transparent":
+          "border-accent shadow-inner print:border-transparent print:shadow-none":
             todo.selected && !isTouchScreen(),
         },
-        { "active:bg-accent/5": isTouchScreen() && distance < 0.2 },
-        { "bg-red-600 text-black": isTouchScreen() && distance >= 0.2 },
       )}
     >
-      <SwipeableViews
-        style={!isTouchScreen() ? { overflowX: "visible" } : undefined} // make sure the tooltip can show on desktop
-        disabled={!isTouchScreen()}
-        resistance
-        onSwitching={(index, type) => {
-          if (type === "move") {
-            setDistance(index);
-          } else {
-            setDistance(0);
-          }
-          if (type === "end" && distance > 0.2) {
-            void todo.deleteTodo(todo.id);
-          }
-        }}
-      >
-        <span className="flex gap-3 items-start py-2 print:py-1 lg:py-3 px-0 lg:px-2 print:px-0 print:text-black">
-          <input
-            tabIndex={-1}
-            type="checkbox"
-            className="checkbox"
-            checked={isCompleted}
-            onChange={() => todo.toggleCompleted(todo.id)}
-          />
-          <span className="text-base flex-grow">
-            {todo.text.split(hashRegexp).map((part, index) => {
-              // Check if the part starts with #
-              if (part.startsWith("#")) {
-                const tagColor = todo.tagProps?.[part]?.color;
-                return (
-                  <button
-                    tabIndex={-1}
-                    aria-label={`Filter by ${part}`}
-                    onClick={() => setFilter(part)}
-                    disabled={getFilter() === part}
-                    key={index}
-                    className={classNames(
-                      `bg-gradient-to-br from-${tagColor}-300 to-${tagColor}-500 inline-block text-transparent bg-clip-text px-1 font-semibold text-xs`,
-                    )}
-                  >
-                    {part}
-                  </button>
-                );
-              }
-              // there's a flaw in the regexp and white space appear as part
-              if (part === " ") {
-                return <></>;
-              }
+      <div className="flex items-start gap-3 px-0 py-3 lg:px-2 lg:py-4 print:px-0 print:py-1 print:text-black">
+        <input
+          tabIndex={-1}
+          type="checkbox"
+          className="checkbox-accent checkbox checkbox-lg lg:checkbox-md"
+          checked={isCompleted}
+          onChange={() => todo.toggleCompleted(todo.id)}
+        />
+        <div className="min-w-0 flex-grow break-inside-avoid-page space-x-1 hyphens-auto break-words text-base">
+          {textParts.map((part, index) => {
+            if (part.type === "hash") {
+              const tagColor = todo.tagProps?.[part.value]?.color;
               return (
-                <span key={index} className="mx-0.5">
-                  {part}
-                </span>
+                <button
+                  aria-label={`Filter by ${part.value}`}
+                  onClick={() => setFilter(part.value)}
+                  disabled={getFilter() === part.value}
+                  key={index}
+                  onTouchEnd={(e) => {
+                    // required for the tap event to work
+                    e.stopPropagation();
+                  }}
+                  className={classNames(
+                    `bg-gradient-to-br from-${tagColor}-300 to-${tagColor}-500 inline-block bg-clip-text px-0.5 text-xs font-semibold text-transparent`,
+                  )}
+                >
+                  {part.value}
+                </button>
               );
-            })}
-          </span>
-          <div className="absolute z-50 right-1 flex gap-x-1.5 top-1/2 -translate-y-1/2 md:group-hover:visible invisible">
-            <div className="lg:tooltip" data-tip="Edit task">
-              <button
-                className="btn btn-ghost btn-sm btn-circle btn-outline"
-                onClick={() => setEditMode()}
-              >
-                <PencilIcon className="h-4 w-4" strokeWidth="2" />
-              </button>
-            </div>
+            }
+            // backlog
+            // create a hook to find if an element is near the top or bottom, so that tooltip can be positioned
+            // detect keyboard to tell what is ctrl key and what is meta key
+            if (part.type === "url") {
+              return (
+                <SelfPositioningTooltip
+                  key={index}
+                  data-tip={`Press ${getMetaSymbolForOS()} to follow`}
+                >
+                  <a
+                    onTouchEnd={(e) => {
+                      // required for the tap event to work
+                      e.stopPropagation();
+                    }}
+                    href={part.value}
+                    className="link"
+                    onClick={(e) => {
+                      if (!e.metaKey) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    {part.value}
+                  </a>
+                </SelfPositioningTooltip>
+              );
+            }
 
-            <div className="lg:tooltip" data-tip="Delete task">
-              <button
-                className="btn btn-ghost btn-sm btn-circle btn-outline btn-error"
-                onClick={() => {
-                  todo.deleteTodo(todo.id);
-                }}
-              >
-                <TrashCanIcon className="h-4 w-4" strokeWidth="2" />
-              </button>
-            </div>
-          </div>
+            return <span key={index}>{part.value}</span>;
+          })}
+        </div>
 
-          <span className="text-sm print:hidden block md:group-hover:invisible">
-            {todo.frequency}
-          </span>
+        <div className="invisible absolute right-1 top-1/2 z-50 flex -translate-y-1/2 gap-x-2 md:group-hover:visible">
+          <SelfPositioningTooltip data-tip="Edit task">
+            <button
+              className="btn btn-circle btn-ghost btn-outline btn-sm"
+              onClick={() => setEditMode()}
+            >
+              <PencilIcon className="h-4 w-4" strokeWidth="2" />
+            </button>
+          </SelfPositioningTooltip>
+
+          <SelfPositioningTooltip data-tip="Delete task">
+            <button
+              className="btn btn-circle btn-ghost btn-outline btn-error btn-sm"
+              onClick={() => {
+                todo.deleteTodo(todo.id);
+              }}
+            >
+              <TrashCanIcon className="h-4 w-4" strokeWidth="2" />
+            </button>
+          </SelfPositioningTooltip>
+        </div>
+
+        <span className="block text-sm lg:group-hover:invisible print:hidden">
+          {todo.frequency}
         </span>
-      </SwipeableViews>
-      <div
-        className={classNames(
-          "absolute right-4 top-0 bottom-0 flex items-center justify-center",
-        )}
-        style={{
-          opacity: distance < 0.2 ? distance : 1,
-        }}
-      >
-        <TrashCanIcon />
       </div>
     </div>
   );
