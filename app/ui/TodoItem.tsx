@@ -168,7 +168,6 @@ const TodoItemReadMode = ({
 }) => {
   const isCompleted = todo.completedDate != null;
   const { setFilter, getFilter } = useFilter();
-  const dragDistance = useRef<[number, number] | null>(null);
   const tapProps = useOnTap({
     onTap: () => {
       setEditMode();
@@ -206,7 +205,6 @@ const TodoItemReadMode = ({
 
   return (
     <div
-      {...tapProps}
       className={classNames(
         "text group relative hover:z-10 ",
         "px-2",
@@ -223,11 +221,14 @@ const TodoItemReadMode = ({
         <input
           tabIndex={-1}
           type="checkbox"
-          className="checkbox-accent checkbox checkbox-lg lg:checkbox-md"
+          className="checkbox"
           checked={isCompleted}
           onChange={() => todo.toggleCompleted(todo.id)}
         />
-        <div className="min-w-0 flex-grow break-inside-avoid-page space-x-1 hyphens-auto break-words text-base">
+        <div
+          {...tapProps}
+          className="min-w-0 flex-grow break-inside-avoid-page space-x-1 hyphens-auto break-words text-base"
+        >
           {textParts.map((part, index) => {
             if (part.type === "hash") {
               const tagColor = todo.tagProps?.[part.value]?.color;
