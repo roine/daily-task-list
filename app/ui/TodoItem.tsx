@@ -227,7 +227,7 @@ const TodoItemReadMode = ({
         />
         <div
           {...tapProps}
-          className="min-w-0 flex-grow break-inside-avoid-page space-x-1 hyphens-auto break-words text-base"
+          className="mt-1 min-w-0 flex-grow break-inside-avoid-page space-x-1 hyphens-auto break-words text-base lg:mt-0"
         >
           {textParts.map((part, index) => {
             if (part.type === "hash") {
