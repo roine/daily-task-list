@@ -207,7 +207,7 @@ const TodoItemReadMode = ({
     <div
       className={classNames(
         "text group relative hover:z-10 ",
-        "px-2",
+        "px-3",
         "border-l-0 border-solid lg:border-l-2",
         "hover:shadow-inner",
         { "border-transparent": isTouchScreen() || !todo.selected },
@@ -221,7 +221,7 @@ const TodoItemReadMode = ({
         <input
           tabIndex={-1}
           type="checkbox"
-          className="checkbox"
+          className="checkbox checkbox-lg lg:checkbox-md"
           checked={isCompleted}
           onChange={() => todo.toggleCompleted(todo.id)}
         />

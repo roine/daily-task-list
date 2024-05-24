@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
 import React, { ReactNode, Suspense } from "react";
 import { AppLayout } from "@/AppLayout";
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   title: "Daily task list",
   description:
     "A todo list that resets every cycle. No accounts, no installations required.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default async function RootLayout({
