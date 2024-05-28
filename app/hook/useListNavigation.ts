@@ -31,60 +31,69 @@ export const useListNavigation = <T extends { id: string }[]>(
     }
   }, [list]);
 
-  const handleListHotkeys = useCallback(
-    (e: KeyboardEvent) => {
-      const isBodyFocused = document.activeElement === document.body;
-      if (selectedTodoId == null || !isBodyFocused) {
-        // Remove selection on escape if body is not the active element, so that user can press esc and then navigate the todo again
-        if (e.key === "Escape") {
-          document.activeElement?.blur();
+  const handleListHotkeys = (e: KeyboardEvent) => {
+    // keys with modifier are to be handled elsewhere
+    if (e.metaKey || e.altKey || e.shiftKey) {
+      return;
+    }
+    const isBodyFocused = document.activeElement === document.body;
+    if (selectedTodoId == null || !isBodyFocused) {
+      // Remove selection on escape if body is not the active element, so that user can press esc and then navigate the todo again
+      if (e.key === "Escape") {
+        const activeElement = document.activeElement as HTMLElement;
+        activeElement.blur();
+      }
+      return;
+    }
+
+    const selectedTodo = list.find((todo) => todo.id === selectedTodoId);
+
+    // Should not happen, make TS happy
+    if (selectedTodo == null) {
+      return;
+    }
+
+    if (e.key === "Backspace" && onPressBackspace != null) {
+      e.preventDefault();
+      onPressBackspace(selectedTodoId).then(({ deleted }) => {
+        /**
+         * If we are deleting then we need to move to another selected item
+         */
+        if (!deleted) {
+          return;
         }
-        return;
-      }
-
-      const selectedTodo = list.find((todo) => todo.id === selectedTodoId);
-
-      // Should not happen, make TS happy
-      if (selectedTodo == null) {
-        return;
-      }
-
-      if (e.key === "Backspace" && onPressBackspace != null) {
-        e.preventDefault();
-        onPressBackspace(selectedTodoId).then(({ deleted }) => {
-          if (!deleted) {
-            return;
-          }
-          const nextTodo = findNextInArray(list, selectedTodo);
-          const prevTodo = findPreviousInArray(list, selectedTodo);
-          if (nextTodo) {
-            setSelectedTodoId(nextTodo.id);
-          } else if (prevTodo) {
-            setSelectedTodoId(prevTodo.id);
-          } else {
-            setSelectedTodoId(null);
-          }
+        const nextTodo = findNextInArray(list, selectedTodo, { trackBy: "id" });
+        const prevTodo = findPreviousInArray(list, selectedTodo, {
+          trackBy: "id",
         });
-      }
-      if (e.key === "Enter" && onPressEnter != null) {
-        e.preventDefault();
-        onPressEnter(selectedTodoId);
-      } else if (e.key === "ArrowDown" && list.length > 1) {
-        e.preventDefault();
-        const nextTodo = findNextInArray(list, selectedTodo);
         if (nextTodo) {
           setSelectedTodoId(nextTodo.id);
-        }
-      } else if (e.key === "ArrowUp" && list.length > 1) {
-        e.preventDefault();
-        const prevTodo = findPreviousInArray(list, selectedTodo);
-        if (prevTodo) {
+        } else if (prevTodo) {
           setSelectedTodoId(prevTodo.id);
+        } else {
+          setSelectedTodoId(null);
         }
+      });
+    }
+    if (e.key === "Enter" && onPressEnter != null) {
+      e.preventDefault();
+      onPressEnter(selectedTodoId);
+    } else if (e.key === "ArrowDown" && list.length > 1) {
+      e.preventDefault();
+      const nextTodo = findNextInArray(list, selectedTodo, { trackBy: "id" });
+      if (nextTodo) {
+        setSelectedTodoId(nextTodo.id);
       }
-    },
-    [list, selectedTodoId],
-  );
+    } else if (e.key === "ArrowUp" && list.length > 1) {
+      e.preventDefault();
+      const prevTodo = findPreviousInArray(list, selectedTodo, {
+        trackBy: "id",
+      });
+      if (prevTodo) {
+        setSelectedTodoId(prevTodo.id);
+      }
+    }
+  };
 
   return { selectedTodoId };
 };

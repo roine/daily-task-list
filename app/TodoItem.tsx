@@ -14,7 +14,7 @@ export const TodoItem = (todo: TodoItemProps) => {
       className={classNames(
         "list-none",
         {
-          "border-l-2 border-accent border-solid shadow-inner":
+          "border-l-2 border-accent border-solid shadow-inner print:border-none":
             todo.selected && !isTouchScreen(),
         },
         {
@@ -22,17 +22,19 @@ export const TodoItem = (todo: TodoItemProps) => {
         },
       )}
     >
-      <div className="flex gap-3 align-items-center py-3 px-3">
+      <span className="flex gap-3 align-items-center py-2 xl:py-3  px-3 print:py-1">
         <input
+          tabIndex={-1}
           type="checkbox"
-          className="checkbox"
+          className="screen:checkbox"
           checked={isCompleted}
           onChange={() => todo.toggleCompletedTodo(todo.id)}
         />
-        <label className="cursor-pointer">
+        <label className="cursor-pointer flex-grow">
           <span className="text-base">{todo.text}</span>
         </label>
-      </div>
+        <span className={"text-sm "}>{todo.frequency}</span>
+      </span>
     </li>
   );
 };

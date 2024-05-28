@@ -9,10 +9,16 @@ import {
   errorReducer,
   getErrorActions,
 } from "@/state/reducer/errorReducer";
+import {
+  FrequencyAction,
+  frequencyReducer,
+  getFrequencyActions,
+} from "@/state/reducer/frequencyReducer";
 
 type Action =
   | { _tag: "Todo"; action: TodoAction }
-  | { _tag: "Error"; action: ErrorAction };
+  | { _tag: "Error"; action: ErrorAction }
+  | { _tag: "Frequency"; action: FrequencyAction };
 
 export const reducer = (state: State = initialState, action: Action): State => {
   switch (action._tag) {
@@ -20,6 +26,8 @@ export const reducer = (state: State = initialState, action: Action): State => {
       return todoReducer(state, action.action);
     case "Error":
       return errorReducer(state, action.action);
+    case "Frequency":
+      return frequencyReducer(state, action.action);
     default:
       return state;
   }
@@ -32,6 +40,9 @@ export const getActions = (dispatch: (props: Action) => void) => {
     ),
     ...getErrorActions((action: ErrorAction) =>
       dispatch({ action, _tag: "Error" }),
+    ),
+    ...getFrequencyActions((action: FrequencyAction) =>
+      dispatch({ action, _tag: "Frequency" }),
     ),
   };
 };

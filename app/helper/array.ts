@@ -1,8 +1,18 @@
-export const findNextInArray = <T extends { id: string | number | Symbol }>(
-  arr: T[],
+export const findNextInArray = <T extends {}>(
+  arr: readonly T[],
   element: T,
-) => {
-  const index = arr.findIndex((obj) => obj.id === element.id);
+  option?: { trackBy?: keyof T; cycle?: boolean },
+): T | null => {
+  let index;
+
+  const trackBy = option?.trackBy;
+  const cycle = option?.cycle;
+
+  if (typeof element === "object" && trackBy != null) {
+    index = arr.findIndex((obj) => obj[trackBy] === element[trackBy]);
+  } else {
+    index = arr.findIndex((obj) => obj === element);
+  }
 
   if (index === -1) {
     // Element not found in the array
@@ -10,6 +20,9 @@ export const findNextInArray = <T extends { id: string | number | Symbol }>(
   }
 
   if (index === arr.length - 1) {
+    if (cycle) {
+      return arr[0];
+    }
     // Element is the last one in the array
     return null;
   }
@@ -18,17 +31,31 @@ export const findNextInArray = <T extends { id: string | number | Symbol }>(
   return arr[index + 1];
 };
 
-export const findPreviousInArray = <T extends { id: string | number | Symbol }>(
-  arr: T[],
+export const findPreviousInArray = <T extends {}>(
+  arr: readonly T[],
   element: T,
-) => {
-  const index = arr.findIndex((obj) => obj.id === element.id);
+  option?: { trackBy?: keyof T; cycle?: boolean },
+): T | null => {
+  let index;
+
+  const trackBy = option?.trackBy;
+  const cycle = option?.cycle;
+
+  if (typeof element === "object" && trackBy != null) {
+    index = arr.findIndex((obj) => obj[trackBy] === element[trackBy]);
+  } else {
+    index = arr.findIndex((obj) => obj === element);
+  }
+
   if (index === -1) {
     // Element not found in the array
     return null;
   }
 
   if (index === 0) {
+    if (cycle) {
+      return arr[arr.length - 1];
+    }
     // Element is the first one in the array
     return null;
   }

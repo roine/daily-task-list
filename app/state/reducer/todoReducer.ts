@@ -81,8 +81,8 @@ export const todoReducer = (state: State, action: TodoAction) => {
 };
 
 export const getTodoActions = (dispatch: (action: TodoAction) => void) => ({
-  getTodos: () => {
-    getTodos()
+  getTodos: async () => {
+    return getTodos()
       .then(({ todos, title }) => {
         dispatch({ type: "ADD_TODOS", payload: { todos } });
         dispatch({ type: "CHANGE_TODO_TITLE", payload: { title } });

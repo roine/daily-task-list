@@ -5,6 +5,7 @@ import { todoReducer, getTodoActions } from "@/state/reducer/todoReducer";
 import { getActions, reducer } from "@/state/reducer";
 
 export const AppStateContext =
+  // @ts-ignore
   React.createContext<[State, ReturnType<typeof getTodoActions>]>(null);
 
 type AppStateProviderProps = {
@@ -19,7 +20,7 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
   );
 };
 
-export const useAppState = (): [State, ReturnType<typeof getTodoActions>] => {
+export const useAppState = (): [State, ReturnType<typeof getActions>] => {
   const context = React.useContext(AppStateContext);
 
   return context;

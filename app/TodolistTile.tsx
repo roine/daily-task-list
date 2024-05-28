@@ -6,8 +6,7 @@ export const TodolistTitle = ({}: TodoListTitleProps) => {
   return (
     <h1
       contentEditable={true}
-      className="text-4xl tracking-tight outline-none mb-10"
-      aria-placeholder={"Your todo list title"}
+      className="text-4xl tracking-tight outline-none mb-4 xl:mb-10"
       defaultValue={state.todoTitle}
       onBlur={(e) => actions.changeTodoTitle(e.currentTarget.innerText)}
       suppressContentEditableWarning={true}
