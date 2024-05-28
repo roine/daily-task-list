@@ -10,7 +10,7 @@ export default function Navbar() {
   const { offline } = useOffline();
 
   return (
-    <div className="hidden bg-base-100 drop-shadow-sm lg:block print:hidden">
+    <div className="z-10 hidden bg-base-100 drop-shadow-sm lg:block print:hidden">
       <div className="navbar mx-auto max-w-4xl px-0 py-0">
         <div className="flex-1">
           <span
@@ -20,8 +20,8 @@ export default function Navbar() {
               offline ? "badge-error" : "badge-success",
             )}
           />
-          <div className="navbar-start">
-            {process.env.NEXT_PUBLIC_AUTH_SERVER_URL && (
+          <div className="navbar-start z-10">
+            {process.env.NEXT_PUBLIC_BACKEND_ENABLED === "true" && (
               <div className="drop dropdown -ml-1">
                 <div
                   tabIndex={0}
@@ -30,20 +30,22 @@ export default function Navbar() {
                 >
                   <HamburgerIcon />
                 </div>
-                <ul
-                  tabIndex={0}
-                  className="menu dropdown-content menu-sm z-[1] mt-2 w-52 rounded-box bg-base-100 p-2 shadow"
-                >
+                <ul className="menu dropdown-content menu-sm  mt-2 w-52 rounded-box bg-base-100 p-2 shadow">
                   {loggedIn && !offline && (
-                    <li>
-                      <a href="#" onClick={signOut}>
-                        Sign out
-                      </a>
-                    </li>
+                    <>
+                      <li>
+                        <a href="/profile">Profile</a>
+                      </li>
+                      <li>
+                        <a href="#" onClick={signOut}>
+                          Sign out
+                        </a>
+                      </li>
+                    </>
                   )}
                   {!loggedIn && !offline && (
                     <li>
-                      <a href={`${process.env.NEXT_PUBLIC_AUTH_SERVER_URL}`}>
+                      <a href={`${process.env.NEXT_PUBLIC_AUTH_URL}`}>
                         Sign in
                       </a>
                     </li>

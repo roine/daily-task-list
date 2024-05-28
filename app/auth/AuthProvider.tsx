@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { redirect, useRouter } from "next/navigation";
 
 type UserResponse = {
   data: {
@@ -19,15 +20,28 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const user = null;
-  // todo
+  const [user, setUser] = useState<UserResponse | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_BACKEND_ENABLED !== "true") return;
+
+    fetch("/api/user", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data: UserResponse) => {
+        setUser(data);
+      });
+  }, []);
+
   const value = {
     user: user,
     loggedIn: user != null,
-    signOut: () =>
-      window.location.replace(
-        `${process.env.NEXT_PUBLIC_AUTH_SERVER_URL}/auth/logout`,
-      ),
+    signOut: () => {
+      router.push("/auth/logout");
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

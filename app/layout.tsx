@@ -38,7 +38,7 @@ export default async function RootLayout({
       <body
         className={classNames(
           roboto.className,
-          "min-w-screen flex min-h-screen flex-col",
+          "min-w-screen min-h-dvh flex flex-col",
         )}
       >
         <ThemeProvider>

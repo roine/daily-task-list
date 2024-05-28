@@ -1,17 +1,20 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { noop } from "@/helper/function";
 
 type OfflineProviderProps = {
   children: React.ReactNode;
 };
 
-export const OfflineContext = createContext<{ offline: boolean }>({
+export const OfflineContext = createContext<{
+  offline: boolean;
+}>({
   offline: false,
 });
 
 export const OfflineProvider = ({ children }: OfflineProviderProps) => {
-  const [offline, setOffline] = useState<boolean>(!window.navigator.onLine);
+  const [offline, setOffline] = useState<boolean>(false);
 
   useEffect(() => {
     const handleOffline = () => setOffline(true);

@@ -70,7 +70,7 @@ const TodoItemEditMode = ({
         setReadMode();
       }}
       className={classNames(
-        "flex flex-col items-stretch gap-3 border-l-0 border-solid px-2 py-3 shadow-inner lg:flex-row lg:border-l-2",
+        "flex flex-col items-center gap-3 border-l-0 border-solid px-2 py-3 shadow-inner lg:flex-row lg:border-l-2",
         { "border-transparent": isTouchScreen() || !todo.selected },
         {
           "border-accent shadow-inner print:border-transparent print:shadow-none":
@@ -282,7 +282,7 @@ const TodoItemReadMode = ({
           })}
         </div>
 
-        <div className="invisible absolute right-1 top-1/2 z-50 flex -translate-y-1/2 gap-x-2 md:group-hover:visible">
+        <div className="invisible absolute right-2 top-1/2 z-50 flex -translate-y-1/2 gap-x-3 md:group-hover:visible">
           <SelfPositioningTooltip data-tip="Edit task">
             <button
               className="btn btn-circle btn-ghost btn-outline btn-sm"

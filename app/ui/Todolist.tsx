@@ -6,6 +6,7 @@ import { useListNavigation } from "@/hook/useListNavigation";
 import { useAuth } from "@/auth/AuthProvider";
 import { Flipper, Flipped, spring } from "react-flip-toolkit";
 import { Todo } from "@/state/state";
+import { RemoteStorage } from "@/storage/remoteStorage";
 
 export default function Todolist() {
   const [editModeTodos, setEditModeTodos] = useState<Todo["id"][]>([]);
@@ -44,22 +45,18 @@ export default function Todolist() {
   // Synchronise with storage
   useEffect(() => {
     if (!loggedIn) return;
-    const todoLists = state.todoLists.map((tl) => ({
-      id: tl.id,
-      todos: tl.todos,
-      title: tl.todoTitle,
-      position: tl.position,
-    }));
+    if (process.env.NEXT_PUBLIC_BACKEND_ENABLED !== "true") return;
 
-    const synchroniseWithStorage = async () => {
-      await fetch(`/api/lists/synchronise`, {
-        credentials: "include",
-        body: JSON.stringify({ todoLists }),
-        method: "POST",
-      });
-    };
+    const todoLists: RemoteStorage.TodoListState[] = state.todoLists.map(
+      (tl) => ({
+        id: tl.id,
+        todos: tl.todos,
+        title: tl.todoTitle,
+        position: tl.position,
+      }),
+    );
 
-    void synchroniseWithStorage();
+    void RemoteStorage.synchroniseWithStorage(todoLists);
   }, []);
 
   const requestEditModeFor = (todoId: string) => (editMode: boolean) => {
