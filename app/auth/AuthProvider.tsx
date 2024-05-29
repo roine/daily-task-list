@@ -1,26 +1,27 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
-
-type UserResponse = {
-  data: {
-    user: User | null;
-  };
-};
+import { useRouter } from "next/navigation";
+import { RemoteData } from "@/helper/remoteData";
+import { Maybe } from "@/helper/maybe";
 
 type User = {};
-export const AuthContext = React.createContext<null | {
-  user: User | null;
-  loggedIn: boolean;
-  signOut: () => void;
-}>(null);
+
+export const AuthContext = React.createContext<
+  Maybe.Model<{
+    user: Maybe.Model<User>;
+    loggedIn: boolean;
+    signOut: () => void;
+  }>
+>(Maybe.nothing);
 
 type AuthProviderProps = {
   children: React.ReactNode;
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<UserResponse | null>(null);
+  const [remoteUser, setRemoteUser] = useState<
+    RemoteData.Model<string, Maybe.Model<User>>
+  >(RemoteData.initial);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,26 +32,49 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       credentials: "include",
     })
       .then((res) => res.json())
-      .then((data: UserResponse) => {
-        setUser(data);
+      .then((data: User) => {
+        setRemoteUser(
+          RemoteData.success(
+            remoteUser == null ? Maybe.nothing : Maybe.just(data),
+          ),
+        );
+      })
+      .catch((e) => {
+        setRemoteUser(RemoteData.failure(e.message));
       });
   }, []);
 
-  const value = {
-    user: user,
-    loggedIn: user != null,
-    signOut: () => {
-      router.push("/auth/logout");
-    },
-  };
+  if (RemoteData.isPending(remoteUser)) {
+    return null;
+  }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  if (RemoteData.isFailure(remoteUser)) {
+    return <>{RemoteData.fromFailure(remoteUser)}</>;
+  }
+
+  if (RemoteData.isSuccess(remoteUser)) {
+    const user = RemoteData.fromSuccess(remoteUser);
+
+    const value = {
+      user,
+      loggedIn: Maybe.isJust(user),
+      signOut: () => {
+        router.push("/auth/logout");
+      },
+    };
+
+    return (
+      <AuthContext.Provider value={Maybe.just(value)}>
+        {children}
+      </AuthContext.Provider>
+    );
+  }
 };
 
 export const useAuth = () => {
   const context = React.useContext(AuthContext);
-  if (context === null) {
+  if (Maybe.isNothing(context)) {
     throw new Error("useAuth must be used within a AuthProvider");
   }
-  return context;
+  return Maybe.fromJust(context);
 };

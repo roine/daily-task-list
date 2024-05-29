@@ -260,7 +260,7 @@ export const getColor = (() => {
   // randomly shuffle the array above
 
   return () => {
-    const current = colorZip.current;
+    const current = Zip.getCurrent(colorZip);
     colorZip = Zip.goNext(colorZip, { cycle: true });
 
     return current;
