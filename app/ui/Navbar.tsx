@@ -5,6 +5,8 @@ import classNames from "classnames";
 import { useOffline } from "@/OfflineProvider";
 import { HamburgerIcon } from "@/icons/Hamburger";
 
+const backendEnabled = process.env.NEXT_PUBLIC_BACKEND_ENABLED === "true";
+
 export default function Navbar() {
   const { loggedIn, signOut } = useAuth();
   const { offline } = useOffline();
@@ -21,7 +23,7 @@ export default function Navbar() {
             )}
           />
           <div className="navbar-start z-10">
-            {process.env.NEXT_PUBLIC_BACKEND_ENABLED === "true" && (
+            {backendEnabled && (
               <div className="drop dropdown -ml-1">
                 <div
                   tabIndex={0}
