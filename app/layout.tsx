@@ -16,7 +16,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Daily task list",
+  title: "Daily Task List",
   description:
     "A todo list that resets every cycle. No accounts, no installations required.",
 };
