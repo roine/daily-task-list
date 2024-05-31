@@ -5,8 +5,6 @@ import classNames from "classnames";
 import { useOffline } from "@/OfflineProvider";
 import { HamburgerIcon } from "@/icons/Hamburger";
 
-const backendEnabled = process.env.NEXT_PUBLIC_BACKEND_ENABLED === "true";
-
 export default function Navbar() {
   const { loggedIn, signOut } = useAuth();
   const { offline } = useOffline();
@@ -23,47 +21,43 @@ export default function Navbar() {
             )}
           />
           <div className="navbar-start z-10">
-            {backendEnabled && (
-              <div className="drop dropdown -ml-1">
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="btn btn-circle btn-ghost"
-                >
-                  <HamburgerIcon />
-                </div>
-                <ul className="menu dropdown-content menu-sm  mt-2 w-52 rounded-box bg-base-100 p-2 shadow">
-                  {loggedIn && !offline && (
-                    <>
-                      <li>
-                        <a href="/profile">Profile</a>
-                      </li>
-                      <li>
-                        <a href="#" onClick={signOut}>
-                          Sign out
-                        </a>
-                      </li>
-                    </>
-                  )}
-                  {!loggedIn && !offline && (
+            <div className="drop dropdown -ml-1">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-circle btn-ghost"
+              >
+                <HamburgerIcon />
+              </div>
+              <ul className="menu dropdown-content menu-sm  mt-2 w-52 rounded-box bg-base-100 p-2 shadow">
+                {loggedIn && !offline && (
+                  <>
                     <li>
-                      <a
-                        href={`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/login`}
-                      >
-                        Sign in
+                      <a href="/profile">Profile</a>
+                    </li>
+                    <li>
+                      <a href="#" onClick={signOut}>
+                        Sign out
                       </a>
                     </li>
-                  )}
-                  {offline && (
-                    //   tailwind css class to make it look like a message
-                    <li className="p-2 text-xs italic text-base-content/50">
-                      You are offline. Your changes will be synchronised as soon
-                      as you connect to the internet.
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
+                  </>
+                )}
+                {!loggedIn && !offline && (
+                  <li>
+                    <a href={`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/login`}>
+                      Sign in
+                    </a>
+                  </li>
+                )}
+                {offline && (
+                  //   tailwind css class to make it look like a message
+                  <li className="p-2 text-xs italic text-base-content/50">
+                    You are offline. Your changes will be synchronised as soon
+                    as you connect to the internet.
+                  </li>
+                )}
+              </ul>
+            </div>
           </div>
         </div>
         <div className="flex-none">

@@ -17,7 +17,6 @@ export const AuthContext = React.createContext<
 type AuthProviderProps = {
   children: React.ReactNode;
 };
-const backendEnabled = process.env.NEXT_PUBLIC_BACKEND_ENABLED === "true";
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [remoteUser, setRemoteUser] = useState<
@@ -26,8 +25,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!backendEnabled) return;
-
     fetch("/api/user", {
       method: "GET",
       credentials: "include",

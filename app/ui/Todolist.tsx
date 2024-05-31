@@ -8,7 +8,6 @@ import { Flipper, Flipped, spring } from "react-flip-toolkit";
 import { Todo } from "@/state/state";
 import { RemoteStorage } from "@/storage/remoteStorage";
 
-const backendEnabled = process.env.NEXT_PUBLIC_BACKEND_ENABLED === "true";
 export default function Todolist() {
   const [editModeTodos, setEditModeTodos] = useState<Todo["id"][]>([]);
 
@@ -46,7 +45,6 @@ export default function Todolist() {
   // Synchronise with storage
   useEffect(() => {
     if (!loggedIn) return;
-    if (!backendEnabled) return;
 
     const todoLists: RemoteStorage.TodoListState[] = state.todoLists.map(
       (tl) => ({
