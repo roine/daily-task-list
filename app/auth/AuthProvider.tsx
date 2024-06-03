@@ -30,15 +30,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       credentials: "include",
     })
       .then((res) => res.json())
+      .catch((e) => {
+        console.log(e);
+        setRemoteUser(RemoteData.failure(e.message));
+      })
       .then((data: User) => {
         setRemoteUser(
           RemoteData.success(
             remoteUser == null ? Maybe.nothing : Maybe.just(data),
           ),
         );
-      })
-      .catch((e) => {
-        setRemoteUser(RemoteData.failure(e.message));
       });
   }, []);
 

@@ -44,9 +44,7 @@ export default function Navbar() {
                 )}
                 {!loggedIn && !offline && (
                   <li>
-                    <a href={`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/login`}>
-                      Sign in
-                    </a>
+                    <a href={`/auth/login`}>Sign in</a>
                   </li>
                 )}
                 {offline && (
