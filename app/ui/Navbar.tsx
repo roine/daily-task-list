@@ -36,7 +36,13 @@ export default function Navbar() {
                       <a href="/profile">Profile</a>
                     </li>
                     <li>
-                      <a href="#" onClick={signOut}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          signOut();
+                        }}
+                      >
                         Sign out
                       </a>
                     </li>

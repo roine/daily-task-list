@@ -17,33 +17,27 @@ const devSettings = {
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.API_URL}/api/:path*`, // Proxy to Backend
+        destination: `${process.env.BACKEND_URL}/app/api/:path*`, // Proxy to Backend
       },
-
+      {
+        source: "/auth/:path*",
+        destination: `${process.env.BACKEND_URL}/app/auth/:path*`,
+      },
+      {
+        source: "/profile",
+        destination: `${process.env.BACKEND_URL}/app/profile`,
+      },
+      {
+        source: "/app/:path*",
+        destination: `${process.env.BACKEND_URL}/app/:path*`,
+      },
     ];
   },
-    async redirects() {
-        return [
-            {
-                source: '/auth/logout',
-                destination: `${process.env.NEXT_PUBLIC_AUTH_URL}/auth/logout`,
-                permanent: false,
-                basePath: false
-            },
-            {
-                source: '/profile',
-                destination: `${process.env.NEXT_PUBLIC_AUTH_URL}/profile`,
-                permanent: false,
-                basePath: false
-            },
-        ]
-    },
 };
 
 const prodSettings = {
   output: "export",
 };
-
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
