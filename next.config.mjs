@@ -12,7 +12,10 @@ const withPWA = withPWAInit({
   // ... other options you like
 });
 
-const devSettings = {
+console.log(process.env.BACKEND_URL)
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   async rewrites() {
     return [
       {
@@ -33,16 +36,6 @@ const devSettings = {
       },
     ];
   },
-};
-
-const prodSettings = {
-  output: "export",
-};
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  ...(process.env.NODE_ENV === "production" ? prodSettings : {}),
-  ...(process.env.NODE_ENV !== "production" ? devSettings : {}),
 };
 
 export default withPWA(nextConfig);

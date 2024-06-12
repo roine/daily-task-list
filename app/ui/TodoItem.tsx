@@ -70,7 +70,7 @@ const TodoItemEditMode = ({
         setReadMode();
       }}
       className={classNames(
-        "flex flex-col items-center gap-3 border-l-0 border-solid px-2 py-3 shadow-inner lg:flex-row lg:border-l-2",
+        "flex flex-col items-stretch gap-3 border-l-0 border-solid p-3 shadow-inner lg:flex-row lg:border-l-2 lg:p-4",
         { "border-transparent": isTouchScreen() || !todo.selected },
         {
           "border-accent shadow-inner print:border-transparent print:shadow-none":
@@ -134,7 +134,7 @@ const TodoItemEditMode = ({
         </button>
       </div>
 
-      <div className="hidden gap-3 lg:flex">
+      <div className="hidden items-center gap-3 lg:flex">
         <SelfPositioningTooltip data-tip="Cancel task changes">
           <button
             type="button"
@@ -208,6 +208,7 @@ const TodoItemReadMode = ({
       className={classNames(
         "text group relative hover:z-10 ",
         "px-3",
+        "group-over",
         "border-l-0 border-solid lg:border-l-2",
         "hover:shadow-inner",
         { "border-transparent": isTouchScreen() || !todo.selected },
@@ -227,7 +228,7 @@ const TodoItemReadMode = ({
         />
         <div
           {...tapProps}
-          className="mt-1 min-w-0 flex-grow break-inside-avoid-page space-x-1 hyphens-auto break-words text-base lg:mt-0"
+          className="mt-1 min-w-0 flex-grow break-inside-avoid-page space-x-1 hyphens-auto break-words pr-8 text-base lg:mt-0"
         >
           {textParts.map((part, index) => {
             if (part.type === "hash") {
@@ -282,7 +283,7 @@ const TodoItemReadMode = ({
           })}
         </div>
 
-        <div className="invisible absolute right-2 top-1/2 z-50 flex -translate-y-1/2 gap-x-3 md:group-hover:visible">
+        <div className="invisible absolute right-2 top-1/2 z-50 flex -translate-y-1/2  gap-x-3 md:group-hover:visible">
           <SelfPositioningTooltip data-tip="Edit task">
             <button
               className="btn btn-circle btn-ghost btn-outline btn-sm"

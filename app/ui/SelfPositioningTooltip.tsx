@@ -7,7 +7,7 @@ export const SelfPositioningTooltip = ({
   ...props
 }: SelfPositioningTooltipProps) => {
   return (
-    <div
+    <span
       {...props}
       className="lg:tooltip lg:tooltip-open"
       onMouseOver={(e) => {
@@ -31,6 +31,6 @@ export const SelfPositioningTooltip = ({
       }}
     >
       {children}
-    </div>
+    </span>
   );
 };
