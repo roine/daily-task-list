@@ -12,7 +12,6 @@ const withPWA = withPWAInit({
   // ... other options you like
 });
 
-console.log(process.env.BACKEND_URL)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

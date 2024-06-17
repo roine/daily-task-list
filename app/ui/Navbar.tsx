@@ -10,13 +10,13 @@ export default function Navbar() {
   const { offline } = useOffline();
 
   return (
-    <div className="z-10 hidden bg-base-100 drop-shadow-sm lg:block print:hidden">
+    <div className="z-10 mx-3 bg-base-100 drop-shadow-sm lg:mx-0 print:hidden">
       <div className="navbar mx-auto max-w-4xl px-0 py-0">
         <div className="flex-1">
           <span
             title={offline ? "Offline" : "Online"}
             className={classNames(
-              "badge badge-primary badge-xs -ml-8 mr-2 hidden lg:block",
+              "badge badge-primary badge-xs -ml-8 mr-2",
               offline ? "badge-error" : "badge-success",
             )}
           />
@@ -67,7 +67,7 @@ export default function Navbar() {
         <div className="flex-none">
           <ul className="menu menu-horizontal px-0">
             <li>
-              <ThemeSwitcher className="hidden px-0 lg:block" />
+              <ThemeSwitcher className="px-0" />
             </li>
           </ul>
         </div>
