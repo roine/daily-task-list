@@ -27,7 +27,7 @@ export type Todo = {
 
 export type TodoListState = {
   id: string;
-  todoTitle: string;
+  title: string;
   position: number;
   globalError: string | null;
   frequencySelected: Frequency;
@@ -50,7 +50,7 @@ export const initialState: State = {
       id: uuidv4(),
       frequencySelected: "Daily",
       position: 0,
-      todoTitle: "",
+      title: "",
       globalError: null,
       todos: [],
       filterBy: null,

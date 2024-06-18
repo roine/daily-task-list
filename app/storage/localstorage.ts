@@ -127,7 +127,7 @@ const todoListForPresentation: DataStructure = {
       id: uuidv4(),
       frequencySelected: "Daily",
       position: 0,
-      todoTitle: "Untitled",
+      title: "Untitled",
       globalError: null,
       todos: todosForPresentation,
       tags: { "#tutorial": { color: getColor() } },

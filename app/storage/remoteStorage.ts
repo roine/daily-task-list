@@ -15,7 +15,7 @@ export namespace RemoteStorage {
   };
 
   export const synchroniseWithStorage = async (todoLists: TodoListState[]) => {
-    await fetch(`/api/lists/synchronise`, {
+    return fetch(`/api/lists/synchronise`, {
       credentials: "include",
       body: JSON.stringify({ todoLists }),
       method: "POST",

@@ -15,6 +15,8 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // https://stackoverflow.com/questions/71847778/why-my-nextjs-component-is-rendering-twice
+  reactStrictMode: false,
   async rewrites() {
     return [
       {

@@ -5,7 +5,7 @@ import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useListNavigation } from "@/hook/useListNavigation";
 import { useAuth } from "@/auth/AuthProvider";
 import { Flipper, Flipped, spring } from "react-flip-toolkit";
-import { Todo } from "@/state/state";
+import { Todo, TodoListState } from "@/state/state";
 import { RemoteStorage } from "@/storage/remoteStorage";
 
 export default function Todolist() {
@@ -46,16 +46,39 @@ export default function Todolist() {
   useEffect(() => {
     if (!loggedIn) return;
 
-    const todoLists: RemoteStorage.TodoListState[] = state.todoLists.map(
-      (tl) => ({
-        id: tl.id,
-        todos: tl.todos,
-        title: tl.todoTitle,
-        position: tl.position,
-      }),
-    );
+    const doSynchronise = async () => {
+      console.log("called");
 
-    void RemoteStorage.synchroniseWithStorage(todoLists);
+      const todoLists: RemoteStorage.TodoListState[] = state.todoLists.map(
+        (tl) => ({
+          id: tl.id,
+          todos: tl.todos,
+          title: tl.title,
+          position: tl.position,
+          tags: tl.tags,
+        }),
+      );
+
+      console.log("before", state.todoLists, "after", todoLists);
+
+      const remoteData = await RemoteStorage.synchroniseWithStorage(todoLists);
+      const newTodoList = await remoteData.json();
+
+      console.log(newTodoList);
+      actions.resetState({
+        lastReset: state.lastReset,
+        todoLists: newTodoList.map((tl: TodoListState) => {
+          const existingTodoList = state.todoLists.find((t) => t.id === tl.id);
+          return {
+            ...tl,
+            frequencySelected: existingTodoList?.frequencySelected ?? "Daily",
+            globalError: existingTodoList?.globalError ?? null,
+            filterBy: existingTodoList?.filterBy ?? null,
+          };
+        }),
+      });
+    };
+    void doSynchronise();
   }, []);
 
   const requestEditModeFor = (todoId: string) => (editMode: boolean) => {
@@ -65,6 +88,8 @@ export default function Todolist() {
       turnOffEditMode(todoId);
     }
   };
+
+  console.log(filteredTodos, state.todoLists);
 
   return state.todoLists[0].todos.length > 0 ? (
     <AnimatedTodoTransition todos={filteredTodos}>

@@ -30,12 +30,12 @@ type DeleteTodoAction = {
 
 type ChangeTodoTitleAction = {
   type: "CHANGE_TODO_TITLE";
-  payload: { title: string };
+  payload: { todoListId: string; title: string };
 };
 
 type setListAction = {
   type: "SET_LIST";
-  payload: { data: Pick<TodoListState, "id" | "todoTitle" | "position"> };
+  payload: { data: Pick<TodoListState, "id" | "title" | "position"> };
 };
 
 type updateTagsAction = {
@@ -125,10 +125,15 @@ export const todoReducer = (state: State, action: TodoAction): State => {
     case "CHANGE_TODO_TITLE":
       return {
         ...state,
-        todoLists: state.todoLists.map((todoList) => ({
-          ...todoList,
-          todoTitle: action.payload.title,
-        })),
+        todoLists: state.todoLists.map((todoList) => {
+          if (todoList.id === action.payload.todoListId) {
+            return {
+              ...todoList,
+              title: action.payload.title,
+            };
+          }
+          return todoList;
+        }),
       };
 
     case "SET_LIST":
@@ -137,7 +142,7 @@ export const todoReducer = (state: State, action: TodoAction): State => {
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
           id: action.payload.data.id,
-          todoTitle: action.payload.data.todoTitle,
+          title: action.payload.data.title,
           position: action.payload.data.position,
         })),
       };
@@ -213,8 +218,18 @@ export const getTodoActions = (
     dispatch({ type: "DELETE_TODO", payload: { id } });
   },
 
-  changeTodoTitle: (title: string) => {
-    dispatch({ type: "CHANGE_TODO_TITLE", payload: { title } });
+  changeTodoTitle: ({
+    todoListId,
+    title,
+  }: {
+    todoListId: string;
+    title: string;
+  }) => {
+    dispatch({ type: "CHANGE_TODO_TITLE", payload: { todoListId, title } });
+    fetch(`/api/lists/${todoListId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ title }),
+    }).then(console.log);
   },
 
   updateTagDictionary: (tags: string[]) => {
