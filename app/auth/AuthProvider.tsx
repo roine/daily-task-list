@@ -29,10 +29,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       method: "GET",
       credentials: "include",
     })
-      .then((res) => res.json())
-      .catch((e) => {
-        console.log(e);
-        setRemoteUser(RemoteData.failure(e.message));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network error");
+        }
+        return response.json();
       })
       .then((data: User) => {
         setRemoteUser(
@@ -40,34 +41,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             remoteUser == null ? Maybe.nothing : Maybe.just(data),
           ),
         );
+      })
+      .catch((e) => {
+        console.log(e);
+        setRemoteUser(RemoteData.failure(e.message));
       });
   }, []);
 
-  if (RemoteData.isPending(remoteUser)) {
+  if (RemoteData.isPending(remoteUser) || RemoteData.isInitial(remoteUser)) {
     return null;
   }
 
-  if (RemoteData.isFailure(remoteUser)) {
-    return <>{RemoteData.fromFailure(remoteUser)}</>;
-  }
+  const user = RemoteData.isSuccess(remoteUser)
+    ? remoteUser.value
+    : Maybe.nothing;
 
-  if (RemoteData.isSuccess(remoteUser)) {
-    const user = RemoteData.fromSuccess(remoteUser);
+  const value = {
+    user,
+    loggedIn: Maybe.isJust(user),
+    signOut: () => {
+      router.push("/auth/logout");
+    },
+  };
 
-    const value = {
-      user,
-      loggedIn: Maybe.isJust(user),
-      signOut: () => {
-        router.push("/auth/logout");
-      },
-    };
-
-    return (
-      <AuthContext.Provider value={Maybe.just(value)}>
-        {children}
-      </AuthContext.Provider>
-    );
-  }
+  return (
+    <AuthContext.Provider value={Maybe.just(value)}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

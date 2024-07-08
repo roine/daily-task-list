@@ -29,6 +29,11 @@ export const VisibilityProvider = ({ children }: VisibilityProviderProps) => {
   );
 };
 
+/**
+ * The visibilitychange event is fired at the document when the
+ * contents of its tab have become visible or have been hidden.
+ *  The event is not cancelable.
+ */
 export const useVisibility = () => {
   return useContext(VisibilityContext);
 };
