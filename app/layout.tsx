@@ -9,6 +9,7 @@ import classNames from "classnames";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { OfflineProvider } from "@/OfflineProvider";
 import { VisibilityProvider } from "@/VisibilityProvider";
+import { DatabaseProvider } from "@/storage/database/DatabaseProvider";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -46,9 +47,11 @@ export default async function RootLayout({
             <OfflineProvider>
               <VisibilityProvider>
                 <AuthProvider>
-                  <AppStateProvider>
-                    <AppLayout>{children}</AppLayout>
-                  </AppStateProvider>
+                  <DatabaseProvider>
+                    <AppStateProvider>
+                      <AppLayout>{children}</AppLayout>
+                    </AppStateProvider>
+                  </DatabaseProvider>
                 </AuthProvider>
               </VisibilityProvider>
             </OfflineProvider>

@@ -1,6 +1,5 @@
 import { frequency, State } from "@/state/state";
 import { findNextInArray, findPreviousInArray } from "@/helper/array";
-import { BrowserStorage } from "@/storage/localstorage";
 
 type NextFrequencyAction = {
   type: "SET_NEXT_FREQUENCY";

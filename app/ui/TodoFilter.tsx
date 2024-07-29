@@ -1,6 +1,7 @@
-import { useAppState, useFilter } from "@/state/AppStateProvider";
+import { useAppState } from "@/state/AppStateProvider";
 import classNames from "classnames";
 import { CloseIcon } from "@/icons/Close";
+import { useFilter } from "@/hook/useFilter";
 
 export const TodoFilter = () => {
   const { getFilter, clearFilter } = useFilter();

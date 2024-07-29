@@ -1,24 +1,17 @@
 "use client";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-} from "react";
-import { State, Todo, TodoListState } from "@/state/state";
-import { Actions, getActions, reducer } from "@/state/reducer";
+import React, { useEffect, useMemo, useReducer, useRef } from "react";
+import { State } from "@/state/state";
+import { Actions, getActions, getReducer } from "@/state/reducer";
 import { useAuth } from "@/auth/AuthProvider";
+import { BrowserStorage } from "@/storage/localstorage";
+import { useResetTodoRoutines } from "@/state/stateResetter";
+import { useDatabase } from "@/storage/database/DatabaseProvider";
 import {
-  isBeforeThisMonth,
-  isBeforeThisWeek,
-  isBeforeThisYear,
-  isBeforeToday,
-} from "@/helper/date";
-import { BrowserStorage, useLocalStorageSync } from "@/storage/localstorage";
-import { useVisibility } from "@/VisibilityProvider";
-import { noop } from "@/helper/function";
-import { resetTodos, useResetTodoRoutines } from "@/state/stateResetter";
+  DailyTaskListDB,
+  getLatestStateFromDB,
+} from "@/storage/database/database";
+import { remoteTagsStream$ } from "@/storage/database/collections/tags";
+import { remoteListsStream$ } from "@/storage/database/collections/todo_lists";
 
 /**
  * The application state is kept in sync with the localstorage.
@@ -33,38 +26,46 @@ type AppStateProviderProps = {
 };
 
 export const AppStateProvider = ({ children }: AppStateProviderProps) => {
-  const newState = useMemo(() => {
-    // Get the state from localStorage
-    const localStore = BrowserStorage.getState();
-
-    // Reset all the todos that need reset based on their repeat frequency
-    const newState = resetTodos(localStore);
-
-    // Store updated todos in the state
-    BrowserStorage.setState(newState);
-
-    return newState;
-  }, []);
-
-  // Initialise our app state with the updated local store
-  const [state, dispatch] = useReducer(reducer, newState);
-
+  const { db } = useDatabase();
   const { loggedIn } = useAuth();
-  const actions = useMemo(() => getActions(dispatch, loggedIn), [loggedIn]);
 
-  // Synchronise storage and in-memory on state change or storage change
-  useLocalStorageSync(state, {
-    onStorageChange: (stateFromLocalStorage: State) =>
-      actions.resetState(stateFromLocalStorage),
-  });
+  const [state, dispatch] = useReducer(
+    getReducer(db),
+    BrowserStorage.getState({ useSandbox: !loggedIn }),
+  );
 
-  // Reset the todos when some routines are executed
+  const actions = useMemo(() => getActions(dispatch, loggedIn), [db, loggedIn]);
+
+  // Reset the todos when some routines are executed and on mount
   useResetTodoRoutines(state, {
     onNeedStateChange: (newState) => {
-      BrowserStorage.setState(newState);
+      console.log("routine ran");
       actions.resetState(newState);
     },
   });
+
+  /**
+   * On boot, assign the database changes to the state, also
+   * subscribe to database changes and update the state accordingly.¬
+   */
+  useEffect(() => {
+    const setStateFromDB = async (db: DailyTaskListDB) => {
+      const newState = await getLatestStateFromDB(db);
+      actions.resetState(newState);
+    };
+
+    if (db !== "initial" && db !== "loggedOut") {
+      void setStateFromDB(db);
+      db.$.subscribe(async (changes) => {
+        console.log("Received changes from the remote", { changes });
+        void setStateFromDB(db);
+      });
+    }
+
+    remoteListsStream$.subscribe((changes) => {
+      console.log("listening to the custom stream", changes);
+    });
+  }, [db]);
 
   return (
     <AppStateContext.Provider value={[state, actions]}>
@@ -75,53 +76,4 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
 
 export const useAppState = (): [State, Actions] => {
   return React.useContext(AppStateContext);
-};
-
-export const useFilter = (
-  {
-    onFilterChange,
-  }:
-    | {
-        onFilterChange: (filter: string | null, filteredTodos: Todo[]) => void;
-      }
-    | undefined = { onFilterChange: noop },
-) => {
-  const [state, actions] = useAppState();
-
-  const oldFilter = useRef(state.todoLists[0].filterBy);
-
-  // Notify parent that the filter changed, make sure to run only on filter change
-  useEffect(() => {
-    if (oldFilter.current !== state.todoLists[0].filterBy) {
-      onFilterChange(
-        state.todoLists[0].filterBy,
-        hookValues.getFilteredTodos(),
-      );
-      oldFilter.current = state.todoLists[0].filterBy;
-    }
-  }, [state.todoLists[0].filterBy]);
-
-  const hookValues = {
-    setFilter: (filter: string) => {
-      actions.setFilter(filter);
-    },
-    clearFilter: () => {
-      actions.clearFilter();
-    },
-    getFilter: () => {
-      return state.todoLists[0].filterBy;
-    },
-    getFilteredTodos: () => {
-      const { filterBy } = state.todoLists[0];
-      if (filterBy === null) {
-        return state.todoLists[0].todos;
-      }
-
-      return state.todoLists[0].todos.filter((todo) => {
-        return todo.tags.includes(filterBy);
-      });
-    },
-  };
-
-  return hookValues;
 };

@@ -1,9 +1,4 @@
-import { initialState, State } from "@/state/state";
-import {
-  TodoAction,
-  todoReducer,
-  getTodoActions,
-} from "@/state/reducer/todoReducer";
+import { State } from "@/state/state";
 import {
   ErrorAction,
   errorReducer,
@@ -14,6 +9,10 @@ import {
   frequencyReducer,
   getFrequencyActions,
 } from "@/state/reducer/frequencyReducer";
+import { DailyTaskListDB } from "@/storage/database/database";
+import { getTodoActions, TodoAction } from "@/state/actions/todoActions";
+import { todoReducer } from "@/state/reducer/todoReducer";
+import { DBStatus } from "@/storage/database/DatabaseProvider";
 
 const Frequency = Symbol();
 const Todo = Symbol();
@@ -24,28 +23,27 @@ export type Action =
   | { _tag: typeof Err; action: ErrorAction }
   | { _tag: typeof Frequency; action: FrequencyAction };
 
-export const reducer = (state: State = initialState, action: Action): State => {
-  switch (action._tag) {
-    case Todo:
-      return todoReducer(state, action.action);
-    case Err:
-      return errorReducer(state, action.action);
-    case Frequency:
-      return frequencyReducer(state, action.action);
-    default:
-      return state;
-  }
-};
+export const getReducer =
+  (db: DBStatus) =>
+  (state: State, action: Action): State => {
+    switch (action._tag) {
+      case Todo:
+        return todoReducer(db)(state, action.action);
+      case Err:
+        return errorReducer(state, action.action);
+      case Frequency:
+        return frequencyReducer(state, action.action);
+      default:
+        return state;
+    }
+  };
 
 export const getActions = (
   dispatch: (props: Action) => void,
   loggedIn: boolean,
 ) => {
   return {
-    ...getTodoActions(
-      (action: TodoAction) => dispatch({ action, _tag: Todo }),
-      loggedIn,
-    ),
+    ...getTodoActions((action: TodoAction) => dispatch({ action, _tag: Todo })),
     ...getErrorActions(
       (action: ErrorAction) => dispatch({ action, _tag: Err }),
       loggedIn,

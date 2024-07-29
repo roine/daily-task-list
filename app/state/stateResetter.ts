@@ -64,26 +64,25 @@ const resetTodoCompleteness = (state: State): State => ({
         return todo;
       }
 
-      if (todo.frequency === "Daily" && isBeforeToday(todo.completedDate)) {
+      const completedDate = new Date(todo.completedDate);
+
+      if (todo.frequency === "Daily" && isBeforeToday(completedDate)) {
         return { ...todo, completedDate: null };
       }
 
-      if (todo.frequency === "Weekly" && isBeforeThisWeek(todo.completedDate)) {
+      if (todo.frequency === "Weekly" && isBeforeThisWeek(completedDate)) {
         return { ...todo, completedDate: null };
       }
 
-      if (
-        todo.frequency === "Monthly" &&
-        isBeforeThisMonth(todo.completedDate)
-      ) {
+      if (todo.frequency === "Monthly" && isBeforeThisMonth(completedDate)) {
         return { ...todo, completedDate: null };
       }
 
-      if (todo.frequency === "Yearly" && isBeforeThisYear(todo.completedDate)) {
+      if (todo.frequency === "Yearly" && isBeforeThisYear(completedDate)) {
         return { ...todo, completedDate: null };
       }
 
-      if (todo.frequency === "Once" && isBeforeToday(todo.completedDate)) {
+      if (todo.frequency === "Once" && isBeforeToday(completedDate)) {
         return { ...todo, completedDate: null };
       }
 

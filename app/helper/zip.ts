@@ -99,3 +99,40 @@ export namespace Zip {
     return getPrev(zip).length === 0;
   };
 }
+
+export const getColor = (() => {
+  let colorZip = Zip.shuffle(
+    Zip.make([], "orange", [
+      "blue",
+      "slate",
+      "gray",
+      "zinc",
+      "neutral",
+      "stone",
+      "red",
+      "amber",
+      "yellow",
+      "lime",
+      "green",
+      "emerald",
+      "teal",
+      "cyan",
+      "sky",
+      "indigo",
+      "violet",
+      "purple",
+      "fuchsia",
+      "pink",
+      "rose",
+    ]),
+  );
+
+  // randomly shuffle the array above
+
+  return () => {
+    const current = Zip.getCurrent(colorZip);
+    colorZip = Zip.goNext(colorZip, { cycle: true });
+
+    return current;
+  };
+})();

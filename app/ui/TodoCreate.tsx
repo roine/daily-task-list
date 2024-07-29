@@ -1,18 +1,13 @@
 "use client";
 
-import React, {
-  KeyboardEventHandler,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import React, { KeyboardEventHandler, useRef, useState } from "react";
 import { useAppState } from "@/state/AppStateProvider";
 import { v4 as uuidv4 } from "uuid";
 import { useFocusInputOnKey } from "@/hook/useFocusInputOnKey";
 import { frequency, Frequency } from "@/state/state";
 import classNames from "classnames";
 import { findNextInArray, findPreviousInArray } from "@/helper/array";
-import { getAllHashTagText } from "@/helper/string";
+import { getAllHashTagsInText } from "@/helper/string";
 import { InfoIcon } from "@/icons/InfoIcon";
 import { isTouchScreen } from "@/helper/device";
 
@@ -25,16 +20,17 @@ export const TodoCreate = () => {
   const handleInputKeydown: KeyboardEventHandler<HTMLInputElement> = async (
     e,
   ) => {
+    // We dont want any modifier pressed, if any just ignore any other key
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
       return;
     }
-    // add an item when press enter
+
     if (e.key === "Enter") {
+      // add an item when press enter
       const text = e.currentTarget.value;
 
-      // preprocess the text
-      const hashTags = getAllHashTagText(text);
-      actions.updateTagDictionary(hashTags);
+      const hashTags = getAllHashTagsInText(text);
+      actions.updateTagDictionary(state.todoLists[0].id, hashTags);
 
       actions.addTodo(
         {
@@ -61,7 +57,8 @@ export const TodoCreate = () => {
       await new Promise((resolve) => {
         setTimeout(() => resolve(1), 200);
       });
-      actions.setNextFrequency();
+
+      void actions.setNextFrequency();
       setTransitioning(false);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();

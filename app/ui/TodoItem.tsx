@@ -1,28 +1,24 @@
-import { Frequency, frequency, Todo } from "../state/state";
-import { getTodoActions } from "@/state/reducer/todoReducer";
+import { Frequency, frequency, Todo, TodoListState } from "../state/state";
 import classNames from "classnames";
 import { isTouchScreen } from "@/helper/device";
-import React, { useRef, useState } from "react";
-import { useFilter } from "@/state/AppStateProvider";
+import React, { useState } from "react";
 import { TrashCanIcon } from "@/icons/TrashCan";
-import {
-  getAllHashTagText,
-  getAllLinkText,
-  hashRegexp,
-  urlRegex,
-} from "@/helper/string";
+import { getAllHashTagsInText, getAllLinkText } from "@/helper/string";
 import { PencilIcon } from "@/icons/Pencil";
 import { CheckIcon } from "@/icons/Check";
 import { CloseIcon } from "@/icons/Close";
 import { SelfPositioningTooltip } from "@/ui/SelfPositioningTooltip";
 import { getMetaSymbolForOS } from "@/helper/window";
 import { useOnTap } from "@/hook/useTap";
+import { useFilter } from "@/hook/useFilter";
+import { getTodoActions } from "@/state/actions/todoActions";
 
 type TodoItemProps = {
   editMode: boolean;
   requestEditMode: (editMode: boolean) => void;
   selected: boolean;
   tagProps: Record<string, { color: string }> | null;
+  listId: TodoListState["id"];
 } & Todo &
   ReturnType<typeof getTodoActions>;
 
@@ -30,11 +26,13 @@ export const TodoItem = (todo: TodoItemProps) => {
   return todo.editMode ? (
     <TodoItemEditMode
       todo={todo}
+      listId={todo.listId}
       setReadMode={() => todo.requestEditMode(false)}
     />
   ) : (
     <TodoItemReadMode
       todo={todo}
+      listId={todo.listId}
       setEditMode={() => todo.requestEditMode(true)}
     />
   );
@@ -42,33 +40,42 @@ export const TodoItem = (todo: TodoItemProps) => {
 
 const TodoItemEditMode = ({
   todo,
+  listId,
   setReadMode,
 }: {
   todo: TodoItemProps;
+  listId: TodoListState["id"];
   setReadMode: () => void;
 }) => {
   const [newFrequency, setNewFrequency] = useState<Frequency>(todo.frequency);
   const [newText, setNewText] = useState(todo.text);
 
+  const submitEditedTodo = (newText: string) => {
+    /**
+     * First we submit a new tag to the dictionary if any.
+     *
+     * Ideally we would also remove tags that are no longer used.
+     */
+    const hashTags = getAllHashTagsInText(newText);
+
+    todo.updateTagDictionary(listId, hashTags);
+
+    const newTodo: Todo = {
+      id: todo.id,
+      text: newText,
+      completedDate: todo.completedDate,
+      frequency: newFrequency,
+      position: todo.position,
+      children: todo.children,
+      tags: hashTags,
+    };
+    todo.editTodo(newTodo, listId);
+    setReadMode();
+  };
+
   return (
     <form
-      onSubmit={() => {
-        const hashTags = getAllHashTagText(newText);
-        todo.updateTagDictionary(hashTags);
-
-        const newTodo: Todo = {
-          id: todo.id,
-          text: newText,
-          completedDate: todo.completedDate,
-          frequency: newFrequency,
-          position: todo.position,
-          children: todo.children,
-          tags: hashTags,
-        };
-        // need to remove old tags and add new tags
-        todo.editTodo(newTodo);
-        setReadMode();
-      }}
+      onSubmit={() => submitEditedTodo(newText)}
       className={classNames(
         "flex flex-col items-stretch gap-3 border-l-0 border-solid p-3 shadow-inner lg:flex-row lg:border-l-2 lg:p-4",
         { "border-transparent": isTouchScreen() || !todo.selected },
@@ -110,7 +117,7 @@ const TodoItemEditMode = ({
             type="button"
             className="btn btn-outline btn-error btn-sm"
             aria-label="Delete task"
-            onClick={() => todo.deleteTodo(todo.id)}
+            onClick={() => todo.deleteTodo(todo.id, listId)}
           >
             <TrashCanIcon className="h-4 w-4" strokeWidth="2" />
             Delete
@@ -161,9 +168,11 @@ const TodoItemEditMode = ({
 
 const TodoItemReadMode = ({
   todo,
+  listId,
   setEditMode,
 }: {
   todo: TodoItemProps;
+  listId: TodoListState["id"];
   setEditMode: () => void;
 }) => {
   const isCompleted = todo.completedDate != null;
@@ -180,7 +189,7 @@ const TodoItemReadMode = ({
       if (getAllLinkText(part).length > 0) {
         return { value: part, type: "url" as const };
       }
-      if (getAllHashTagText(part).length > 0) {
+      if (getAllHashTagsInText(part).length > 0) {
         return { value: part, type: "hash" as const };
       }
       return { value: part, type: "plain" as const };
@@ -232,7 +241,7 @@ const TodoItemReadMode = ({
         >
           {textParts.map((part, index) => {
             if (part.type === "hash") {
-              const tagColor = todo.tagProps?.[part.value]?.color;
+              const tagColor = todo.tagProps?.[part.value]?.color ?? "pink";
               return (
                 <button
                   aria-label={`Filter by ${part.value}`}
@@ -297,7 +306,7 @@ const TodoItemReadMode = ({
             <button
               className="btn btn-circle btn-ghost btn-outline btn-error btn-sm"
               onClick={() => {
-                todo.deleteTodo(todo.id);
+                todo.deleteTodo(todo.id, listId);
               }}
             >
               <TrashCanIcon className="h-4 w-4" strokeWidth="2" />
@@ -305,7 +314,7 @@ const TodoItemReadMode = ({
           </SelfPositioningTooltip>
         </div>
 
-        <span className="block text-sm lg:group-hover:invisible print:hidden">
+        <span className="block text-sm md:group-hover:invisible print:hidden">
           {todo.frequency}
         </span>
       </div>

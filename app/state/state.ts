@@ -1,5 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
-
+// Todo: rename to frequencies
 export const frequency = [
   "Daily",
   "Weekly",
@@ -18,7 +17,7 @@ export type Tag = {
 export type Todo = {
   id: string;
   text: string;
-  completedDate: Date | null;
+  completedDate: string | null;
   frequency: Frequency;
   position: number;
   children: Todo[];
@@ -40,20 +39,4 @@ export type TodoListState = {
 export type State = {
   todoLists: TodoListState[];
   lastReset: Date | null;
-};
-
-export const initialState: State = {
-  lastReset: null,
-  todoLists: [
-    {
-      tags: null,
-      id: uuidv4(),
-      frequencySelected: "Daily",
-      position: 0,
-      title: "",
-      globalError: null,
-      todos: [],
-      filterBy: null,
-    },
-  ],
 };

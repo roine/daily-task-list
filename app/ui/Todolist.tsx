@@ -1,18 +1,17 @@
 "use client";
-import { useAppState, useFilter } from "../state/AppStateProvider";
+
+import { useAppState } from "@/state/AppStateProvider";
 import { TodoItem } from "@/ui/TodoItem";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useListNavigation } from "@/hook/useListNavigation";
-import { useAuth } from "@/auth/AuthProvider";
 import { Flipper, Flipped, spring } from "react-flip-toolkit";
-import { Todo, TodoListState } from "@/state/state";
-import { RemoteStorage } from "@/storage/remoteStorage";
+import { Todo } from "@/state/state";
+import { useFilter } from "@/hook/useFilter";
 
 export default function Todolist() {
   const [editModeTodos, setEditModeTodos] = useState<Todo["id"][]>([]);
 
   const [state, actions] = useAppState();
-  const { loggedIn } = useAuth();
   const { getFilteredTodos } = useFilter({
     onFilterChange: () => {
       setSelectedItemId(filteredTodos[0].id);
@@ -31,7 +30,8 @@ export default function Todolist() {
     filteredTodos,
     {
       onPressEnter: actions.toggleCompleted,
-      onPressBackspace: actions.deleteTodo,
+      onPressBackspace: (todoId) =>
+        actions.deleteTodo(todoId, state.todoLists[0].id),
       onPressEsc: turnOffEditMode,
       customs: [
         {
@@ -42,45 +42,6 @@ export default function Todolist() {
     },
   );
 
-  // Synchronise with storage
-  useEffect(() => {
-    if (!loggedIn) return;
-
-    const doSynchronise = async () => {
-      console.log("called");
-
-      const todoLists: RemoteStorage.TodoListState[] = state.todoLists.map(
-        (tl) => ({
-          id: tl.id,
-          todos: tl.todos,
-          title: tl.title,
-          position: tl.position,
-          tags: tl.tags,
-        }),
-      );
-
-      console.log("before", state.todoLists, "after", todoLists);
-
-      const remoteData = await RemoteStorage.synchroniseWithStorage(todoLists);
-      const newTodoList = await remoteData.json();
-
-      console.log(newTodoList);
-      actions.resetState({
-        lastReset: state.lastReset,
-        todoLists: newTodoList.map((tl: TodoListState) => {
-          const existingTodoList = state.todoLists.find((t) => t.id === tl.id);
-          return {
-            ...tl,
-            frequencySelected: existingTodoList?.frequencySelected ?? "Daily",
-            globalError: existingTodoList?.globalError ?? null,
-            filterBy: existingTodoList?.filterBy ?? null,
-          };
-        }),
-      });
-    };
-    void doSynchronise();
-  }, []);
-
   const requestEditModeFor = (todoId: string) => (editMode: boolean) => {
     if (editMode) {
       turnOnEditMode(todoId);
@@ -89,14 +50,13 @@ export default function Todolist() {
     }
   };
 
-  console.log(filteredTodos, state.todoLists);
-
   return state.todoLists[0].todos.length > 0 ? (
     <AnimatedTodoTransition todos={filteredTodos}>
       {(todo) => {
         return (
           <TodoItem
             key={todo.id}
+            listId={state.todoLists[0].id}
             tagProps={state.todoLists[0].tags}
             {...actions}
             {...todo}

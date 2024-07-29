@@ -117,17 +117,17 @@ export const useTheme = () => {
 export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
   const { theme, changeTheme } = useTheme();
 
-  // set to intermediate if the theme is not set
   useEffect(() => {
+    // set to intermediate if the theme is not set
     const userSetPreference = localStorage.getItem(themeKey) as Theme;
     if (userSetPreference === null) {
       // @ts-ignore
-      document.getElementById("my-toggle")!.indeterminate = true;
+      document.getElementById("theme-toggle")!.indeterminate = true;
     }
   }, []);
 
-  // listen to localstorage change of theme value, and set the theme accordingly
   useEffect(() => {
+    // When localstorage change theme value, set the theme accordingly
     window.addEventListener("storage", (e) => {
       if (e.key === themeKey) {
         const newTheme = e.newValue as Theme;
@@ -140,8 +140,8 @@ export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
     };
   }, []);
 
-  // when system change preferred color change the theme
   useEffect(() => {
+    // When system change preferred color, set the theme accordingly
     const handleThemeChange = () => {
       const mediaQueryPreference = getMediaQueryPreference();
       if (theme !== mediaQueryPreference) {
@@ -152,6 +152,7 @@ export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
     window
       .matchMedia("(prefers-color-scheme: dark)")
       .addEventListener("change", handleThemeChange);
+
     window
       .matchMedia("(prefers-color-scheme: light)")
       .addEventListener("change", handleThemeChange);
@@ -172,7 +173,7 @@ export const ThemeSwitcher = (props: HTMLAttributes<HTMLDivElement>) => {
         <SunIcon />
         <input
           type="checkbox"
-          id="my-toggle"
+          id="theme-toggle"
           className="theme-controller toggle toggle-xs"
           onChange={(e) => changeTheme(e.target.checked ? "dark" : "light")}
           checked={darkThemes.includes(theme)}

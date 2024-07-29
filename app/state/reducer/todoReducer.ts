@@ -1,92 +1,42 @@
 import { State, Todo, TodoListState } from "@/state/state";
+import { getColor, Zip } from "@/helper/zip";
+import { TodoAction } from "@/state/actions/todoActions";
+import { reducer as RXDBReducer } from "@/state/RXDBReducer/todoReducer";
+import { DailyTaskListDB } from "@/storage/database/database";
+import { DBStatus } from "@/storage/database/DatabaseProvider";
 import { BrowserStorage } from "@/storage/localstorage";
-import { RemoteStorage } from "@/storage/remoteStorage";
-import { Zip } from "@/helper/zip";
 
-type AddTodosAction = {
-  type: "ADD_TODOS";
-  payload: { todos: Todo[] };
-};
-
-type AddTodoAction = {
-  type: "ADD_TODO";
-  payload: { todo: Todo };
-};
-
-type EditTodoAction = {
-  type: "EDIT_TODO_TEXT";
-  payload: { todo: Todo };
-};
-
-type ToggleCompleted = {
-  type: "TOGGLE_COMPLETED";
-  payload: { id: Todo["id"] };
-};
-
-type DeleteTodoAction = {
-  type: "DELETE_TODO";
-  payload: { id: Todo["id"] };
-};
-
-type ChangeTodoTitleAction = {
-  type: "CHANGE_TODO_TITLE";
-  payload: { todoListId: string; title: string };
-};
-
-type setListAction = {
-  type: "SET_LIST";
-  payload: { data: Pick<TodoListState, "id" | "title" | "position"> };
-};
-
-type updateTagsAction = {
-  type: "UPDATE_TAGS";
-  payload: { tags: string[] };
-};
-
-type setFilterAction = {
-  type: "SET_FILTER";
-  payload: { filter: string | null };
-};
-
-// takes a state and apply it to our app state
-type resetStateAction = {
-  type: "RESET_STATE";
-  payload: { state: State };
-};
-
-export type TodoAction =
-  | AddTodosAction
-  | AddTodoAction
-  | EditTodoAction
-  | ToggleCompleted
-  | DeleteTodoAction
-  | ChangeTodoTitleAction
-  | setListAction
-  | updateTagsAction
-  | setFilterAction
-  | resetStateAction;
-
-export const todoReducer = (state: State, action: TodoAction): State => {
+export const reducer = (state: State, action: TodoAction): State => {
   console.log(action);
   switch (action.type) {
     case "ADD_TODOS":
       return {
         ...state,
-        todoLists: state.todoLists.map((todoList) => ({
-          ...todoList,
-          todos: action.payload.todos,
-        })),
+        todoLists: state.todoLists.map((todoList) => {
+          if (todoList.id === action.payload.listId) {
+            return {
+              ...todoList,
+              todos: action.payload.todos,
+            };
+          }
+          return todoList;
+        }),
       };
 
     case "ADD_TODO":
       return {
         ...state,
-        todoLists: state.todoLists.map((todoList) => ({
-          ...todoList,
-          todos: [...todoList.todos, action.payload.todo],
-        })),
+        todoLists: state.todoLists.map((todoList) => {
+          if (todoList.id === action.payload.listId) {
+            return {
+              ...todoList,
+              todos: [...todoList.todos, action.payload.todo],
+            };
+          }
+          return todoList;
+        }),
       };
-    case "EDIT_TODO_TEXT":
+    case "EDIT_TODO":
       return {
         ...state,
         todoLists: state.todoLists.map((todoList) => ({
@@ -106,7 +56,10 @@ export const todoReducer = (state: State, action: TodoAction): State => {
             todo.id === action.payload.id
               ? {
                   ...todo,
-                  completedDate: todo.completedDate == null ? new Date() : null,
+                  completedDate:
+                    todo.completedDate == null
+                      ? new Date().toISOString()
+                      : null,
                 }
               : todo,
           ),
@@ -118,11 +71,16 @@ export const todoReducer = (state: State, action: TodoAction): State => {
         ...state,
         todoLists: state.todoLists.map((todoList) => ({
           ...todoList,
-          todos: todoList.todos.filter((todo) => todo.id !== action.payload.id),
+          todos:
+            todoList.id === action.payload.listId
+              ? todoList.todos.filter(
+                  (todo) => todo.id !== action.payload.todoId,
+                )
+              : todoList.todos,
         })),
       };
 
-    case "CHANGE_TODO_TITLE":
+    case "CHANGE_TODOLIST_TITLE":
       return {
         ...state,
         todoLists: state.todoLists.map((todoList) => {
@@ -154,6 +112,9 @@ export const todoReducer = (state: State, action: TodoAction): State => {
       return {
         ...state,
         todoLists: state.todoLists.map((todoList) => {
+          if (todoList.id !== action.payload.listId) {
+            return todoList;
+          }
           const existingTagDict = todoList.tags;
           let newOrExistingTags = action.payload.tags;
 
@@ -193,91 +154,24 @@ export const todoReducer = (state: State, action: TodoAction): State => {
   }
 };
 
-export const getTodoActions = (
-  dispatch: (action: TodoAction) => void,
-  loggedIn: boolean,
-) => ({
-  resetState: (state: State) => {
-    dispatch({ type: "RESET_STATE", payload: { state } });
-  },
+/**
+ * After the reducing the state if we are logged in we will sync the state with the remote db
+ * Otherwise we save the data in the local storage
+ */
+export const todoReducer =
+  (db: DBStatus) =>
+  (state: State, action: TodoAction): State => {
+    const newState = reducer(state, action);
 
-  addTodo: (todo: Todo, listId: string) => {
-    dispatch({ type: "ADD_TODO", payload: { todo } });
-    loggedIn && RemoteStorage.addTodo(todo, listId).then(console.log);
-  },
+    try {
+      if (db !== "initial" && db != "loggedOut") {
+        void RXDBReducer(db)({ oldState: state, newState }, action);
+      } else if (db === "loggedOut") {
+        BrowserStorage.setState({ useSandbox: true }, newState);
+      }
+    } catch (e) {
+      console.error("synchronisation with RXDB failed", e);
+    }
 
-  editTodo: (todo: Todo) => {
-    dispatch({ type: "EDIT_TODO_TEXT", payload: { todo } });
-  },
-
-  toggleCompleted: (id: Todo["id"]) => {
-    dispatch({ type: "TOGGLE_COMPLETED", payload: { id } });
-  },
-
-  deleteTodo: (id: Todo["id"]) => {
-    dispatch({ type: "DELETE_TODO", payload: { id } });
-  },
-
-  changeTodoTitle: ({
-    todoListId,
-    title,
-  }: {
-    todoListId: string;
-    title: string;
-  }) => {
-    dispatch({ type: "CHANGE_TODO_TITLE", payload: { todoListId, title } });
-    fetch(`/api/lists/${todoListId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ title }),
-    }).then(console.log);
-  },
-
-  updateTagDictionary: (tags: string[]) => {
-    dispatch({ type: "UPDATE_TAGS", payload: { tags } });
-  },
-
-  setFilter: (filter: string) => {
-    dispatch({ type: "SET_FILTER", payload: { filter } });
-  },
-
-  clearFilter: () => {
-    dispatch({ type: "SET_FILTER", payload: { filter: null } });
-  },
-});
-
-export const getColor = (() => {
-  let colorZip = Zip.shuffle(
-    Zip.make([], "orange", [
-      "blue",
-      "slate",
-      "gray",
-      "zinc",
-      "neutral",
-      "stone",
-      "red",
-      "amber",
-      "yellow",
-      "lime",
-      "green",
-      "emerald",
-      "teal",
-      "cyan",
-      "sky",
-      "indigo",
-      "violet",
-      "purple",
-      "fuchsia",
-      "pink",
-      "rose",
-    ]),
-  );
-
-  // randomly shuffle the array above
-
-  return () => {
-    const current = Zip.getCurrent(colorZip);
-    colorZip = Zip.goNext(colorZip, { cycle: true });
-
-    return current;
+    return newState;
   };
-})();
